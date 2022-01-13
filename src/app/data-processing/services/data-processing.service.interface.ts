@@ -1,3 +1,3 @@
 export interface IDataProcessingService {
-  processData(): any;
+  processData(obj: any): any;
 }
