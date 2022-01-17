@@ -3,6 +3,8 @@ import { IFileProcessingService } from '../../file-and-json-processing/services/
 import { IJsonProcessingService } from '../../file-and-json-processing/services/json-processing.service.interface';
 import { IDataProcessingService } from './data-processing.service.interface';
 import xlsx from 'node-xlsx';
+import { Property } from '../../file-and-json-processing/models/property';
+import { Group } from '../../file-and-json-processing/models/group';
 
 @Injectable()
 export class DataProcessingService implements IDataProcessingService {
@@ -25,27 +27,22 @@ export class DataProcessingService implements IDataProcessingService {
     return this.mapFileIntoObject(file);
   }
 
-  mapFileIntoObject(file: any): Promise<any> {
-    let result: any = [];
+  mapFileIntoObject(file: any): Group[] {
+    let result: Group[] = [];
     const l1: any = file[0].data;
     for (let i = 1; i < l1.length; i++) {
-      console.log(i);
-      let temp: any = [];
-      console.log(l1[0].length);
+      let group: Group = {} as Group;
+      group.properties = [];
       for (let j = 0; j < l1[0].length; j++) {
-        console.log(j);
-        console.log(l1[0][j]);
-        console.log(l1[i][j]);
-        var obj = {
+        var obj: Property = {
           key: l1[0][j],
           value: l1[i][j],
         };
-        console.log(obj);
-        temp.push(obj);
+        group.properties.push(obj);
       }
-      console.log('after loop');
-      result.push(temp);
+      result.push(group);
     }
+    console.log(typeof result);
     return result;
   }
 }
