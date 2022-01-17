@@ -13,30 +13,23 @@ const def: Config = {
     loggerLevel: 'info',
   },
   database: {
-
-    "type": "postgres",
-    "host": "localhost",
-    "port": Number(process.env.TYPEORM_PORT),
-    "username": process.env.TYPEORM_USERNAME,
-    "password": process.env.TYPEORM_PASSWORD,
-    "database": process.env.TYPEORM_DATABASE,
-    "synchronize": false,
-    "migrationsRun": true,
-    "logging": true,
-    "entities": [
-      "dist/**/*.entity.js"
-    ],
-    "migrations": [
-      "dist/migration/**/*.js"
-    ],
-    "subscribers": [
-      "dist/subscriber/**/*.js"
-    ],
-    "cli": {
-      "entitiesDir": "src/entity",
-      "migrationsDir": "src/migration",
-      "subscribersDir": "src/subscriber"
-    }
+    type: 'postgres',
+    host: 'localhost',
+    port: Number(process.env.TYPEORM_PORT),
+    username: process.env.TYPEORM_USERNAME,
+    password: process.env.TYPEORM_PASSWORD,
+    database: process.env.TYPEORM_DATABASE,
+    synchronize: false,
+    migrationsRun: true,
+    logging: true,
+    entities: ['dist/**/*.entity.js'],
+    migrations: ['dist/migration/**/*.js'],
+    subscribers: ['dist/subscriber/**/*.js'],
+    cli: {
+      entitiesDir: 'src/entity',
+      migrationsDir: 'src/migration',
+      subscribersDir: 'src/subscriber',
+    },
   },
   swaggerConfig: {
     swaggerTitle: 'NestJS Application',
