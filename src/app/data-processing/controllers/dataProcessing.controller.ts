@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Post, UploadedFile, UseInterceptors, Response } from '@nestjs/common';
+import { Controller, Inject, Post, UploadedFile, UseInterceptors, Response, Body } from '@nestjs/common';
 import { IDataProcessingService } from '../services/data-processing.service.interface';
 import { Response as eResponse } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -6,10 +6,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class DataProcessingController {
   constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) {}
 
-  @Get('test')
-  getHello(): string {
-    console.log('HIIIIIIIIIIIIIII');
-    return this.dataProcessingService.processData();
+  @Post('test')
+  processData(@Body() obj: any, @Response() res: eResponse): any {
+    const result = this.dataProcessingService.processData(obj);
+    res.status(200).json(result);
   }
   @Post('getFile')
   @UseInterceptors(FileInterceptor('file'))

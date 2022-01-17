@@ -1,4 +1,3 @@
 export interface IJsonProcessingService {
-
-    processJson(): any
+  processJson(obj: any): any;
 }
