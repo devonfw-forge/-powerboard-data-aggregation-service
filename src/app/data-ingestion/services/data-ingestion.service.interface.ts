@@ -1,1 +1,4 @@
-export interface IDataIngestionService {}
+export interface IDataIngestionService {
+
+    ingest(obj: any): any
+}
