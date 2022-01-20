@@ -3,8 +3,8 @@ import { Exclude } from 'class-transformer';
 import { ApiHideProperty } from '@nestjs/swagger';
 
 export abstract class BaseEntity {
-  @PrimaryGeneratedColumn('increment')
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @VersionColumn({ default: 1 })
   @Exclude({ toPlainOnly: true })

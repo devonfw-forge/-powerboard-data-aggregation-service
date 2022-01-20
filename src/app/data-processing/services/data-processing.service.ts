@@ -3,23 +3,28 @@ import { IFileProcessingService } from '../../file-and-json-processing/services/
 import { IJsonProcessingService } from '../../file-and-json-processing/services/json-processing.service.interface';
 import { IDataProcessingService } from './data-processing.service.interface';
 import xlsx from 'node-xlsx';
+import { IDataIngestionService } from '../../data-ingestion/services/data-ingestion.service.interface';
 
 @Injectable()
 export class DataProcessingService implements IDataProcessingService {
   constructor(
     @Inject('IFileProcessingService') private readonly fileProcessingService: IFileProcessingService,
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
-  ) {}
+    @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
+  ) { }
 
-  processData(obj: any): any {
+  processData(obj: any, teamId: string): any {
     const x = this.fileProcessingService.processFile();
     console.log(x);
-    return this.jsonProcessingService.processJson(obj);
+    const processedJson = this.jsonProcessingService.processJson(obj);
+
+    return this.dataIngestionService.ingest(processedJson, teamId);
   }
 
-  async uploadFileXlsxType(inputfile: any): Promise<any> {
+  async uploadFileXlsxType(inputfile: any, teamId: string): Promise<any> {
     // Reading our test file
     console.log(inputfile);
+    console.log(teamId);
     const file = xlsx.parse(inputfile.buffer);
     console.log('file read');
     return this.mapFileIntoObject(file);

@@ -1,121 +1,114 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { IJsonProcessingService } from '../../file-and-json-processing/services/json-processing.service.interface';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
+import { Repository } from 'typeorm/repository/Repository';
+import { Group } from '../../file-and-json-processing/models/group';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm/repository/Repository';
 import { Sprint } from '../model/entities/sprint.entity';
+import { SprintStatus } from '../model/entities/sprint_status.entity';
+import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
+import { Team } from '../model/entities/team.entity';
+//import { Team } from '../model/entities/team.entity';
+
 import { IDataIngestionService } from './data-ingestion.service.interface';
 
 @Injectable()
-export class DataIngestionService implements IDataIngestionService {
+export class DataIngestionService extends TypeOrmCrudService<Sprint> implements IDataIngestionService {
   constructor(
-    @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService
-  ) { }
-
-  // ingest(obj: any) {
-  //   const processedData = this.jsonProcessingService.processJson(obj);
-  //   console.log(processedData);
-  //   let keys = Object.keys(processedData.properties[0]);
-  //   console.log(keys);
-  //   // let keys = processedData.properties[0].keys;
-  //   // console.log(keys)
-  //   // let temp = property.key;
-  //   // console.log(temp);
+    @InjectRepository(Sprint) private readonly sprintRepository: Repository<Sprint>,
+    @InjectRepository(SprintStatus) private readonly sprintStatusRepository: Repository<SprintStatus>,
+    @InjectRepository(SprintWorkUnit) private readonly sprintWorkUnitRepository: Repository<SprintWorkUnit>,
+    @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
+  ) {
+    super(sprintRepository);
+  }
 
 
-  //   for (let i = 0; i < processedData.properties.length; i++) {
-  //     let keys = Object(processedData.properties[0].keys);
-  //     for (let j = 0; j < keys.length; j++) {
-  // let x = keys[j].split("_");
-  // var actualKey = x[x.length - 1];
-  //       console.log("actualllllllllllllllllll")
-  //       console.log(actualKey);
-  //     }
-  //     // console.log(actualKey);
-  //   }
-  // console.log("AAAAAAAAAAAAAAAAAAAAAA");
-  // console.log(processedData);
-  // for (let group of processedData) {
+  async ingest(processedJson: Group[], teamId: string): Promise<any> {
+    let sprintArray: Sprint[] = [];
+    for (let group of processedJson) {
+      let sprint: Sprint = {} as Sprint
+      //let index = 0;
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split("_");
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        // index = Number(splittedKeys[splittedKeys.length - 2]);
+        // if (sprintArray.length === index - 1) {
+        //   console.log(index);
+        //   sprintArray[index - 1] = sprint;
+        //   sprint = {} as Sprint
+        // }
+        if (actualKey === "id") {
+          console.log(object.value)
+          sprint.sprint_number = Number(object.value);
+        }
+        if (actualKey === "startDate") {
+          console.log(object.value)
+          sprint.start_date = object.value;
+        }
+        if (actualKey === "state") {
+          console.log(object.value)
 
-  // console.log("KKKKKKKKKKKKKKKKKKKKK")
-  // console.log(entityKeys);
+          if (object.value === "active") {
+            object.value = 'Completed'
+          }
+          else {
+            object.value = 'In Progress'
+          }
+          const sprintStatus = await this.sprintStatusRepository.findOne({ where: { status: object.value } });
+          sprint.status = sprintStatus!.id;
+        }
+        if (actualKey === "endDate") {
+          console.log(object.value)
+          sprint.end_date = object.value;
+        }
+        if (actualKey === "workUnit") {
+          console.log(object.value)
+          const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
+          sprint.work_unit = sprintWorkUnit!.id;
+        }
 
-  // for (let property of processedData.properties) {
-  //   let sprint = new Sprint();
-
-  //   Object.keys(property);
-  //   // console.log(processedDataKeys);
-  //   var entityKeys = Object.keys(sprint);
-
-  // if (entityKeys.includes(property.key)) {
-
-  //     // let temp: string=obj.key
-  //     let x = property.key;
-
-  // (sprint as any)[x] = property.value;
-
-  // let index = entityKeys.indexOf(property.key)
-  // entityKeys.splice(index, 1);
-  //     // data.temp = obj.value;
-
-  //   }
-  //   console.log(sprint);
-  // }
-
-  //}
-  // }
-
-  ingest(obj: any): any {
-    const processedData = this.jsonProcessingService.processJson(obj);
-
-    // for (let group of processedData) {
-    let sprint = new Sprint();
-    var entityKeys = Object.keys(sprint);
-    // console.log(entityKeys);
-    //let keysArray = [];
-    // console.log("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKkk")
-    // console.log(Object.keys(processedData.properties[0]));
-
-
-    for (let obj of processedData.properties) {
-      //let key = processedData.properties[0].key;
-      // console.log(obj);
-      // console.log(obj.key)
-      let x = obj.key;
-      let splittedKeys = x.split("_");
-      // console.log("Splittedddddddddddddddd");
-      // console.log(splittedKeys);
-      var actualKey = splittedKeys[splittedKeys.length - 1];
-
-      console.log(actualKey);
-      if (splittedKeys[1] == 0) {
-        let y = splittedKeys[splittedKeys.length - 1]
-        console.log(y)
       }
-      if (entityKeys.includes(actualKey)) {
-        (sprint as any)[x] = obj.value;
-
-        let index = entityKeys.indexOf(actualKey)
-        entityKeys.splice(index, 1);
-        console.log(sprint);
-      }
-
-      //keysArray.push(actualKey);
-      //console.log("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIi")
-      //console.log(processedData.properties[obj]);
-      // if (entityKeys.includes(obj.key)) {
-
-      //   // let temp: string=obj.key
-      //   let x = obj.key;
-
-      //   (sprint as any)[x] = obj.value;
-
-      //   let index = entityKeys.indexOf(obj.key)
-      //   entityKeys.splice(index, 1);
-      //   // data.temp = obj.value;
-      //   console.log(sprint);
-      // }
+      const team = await this.teamRepository.findOne({ where: { id: teamId } });
+      sprint.team = team!
+      sprintArray.push(sprint);
       // console.log(sprint);
     }
-    //console.log(keysArray)
-    //}
+    await this.sprintRepository.findOne('20155bf8-ada5-495c-8019-8d7ab76d488e');
+    console.log(sprintArray);
+    return sprintArray;
   }
 }
+   // console.log(sprint)
+
+    // sprint.sprintNumber=
+    // sprint.id = 0;
+    // sprint.sprintNumber = 0;
+    // sprint.startDate = '';
+    // sprint.endDate = '';
+    // sprint.state = '';
+    // sprint.team = {} as Team;
+    // sprint.workUnit = ''
+    //   let sprintKeys = Object.keys(sprint);
+    //   for (let object of processedJson.properties) {
+    // let x = object.key;
+    // let splittedKeys = x.split("_");
+    // var actualKey = splittedKeys[splittedKeys.length - 1];
+    //     console.log(actualKey);
+    //     if (sprintKeys.includes(actualKey)) {
+
+    //       (sprint as any)[actualKey] = object.value;
+
+    //       let index = sprintKeys.indexOf(actualKey);
+    //       sprintKeys.splice(index, 1);
+
+    //     }
+
+    //   }
+    //   console.log(sprint);
+    //   return sprint;
+
+
 

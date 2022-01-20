@@ -5,7 +5,7 @@ import { IJsonProcessingService } from './json-processing.service.interface';
 
 @Injectable()
 export class JsonProcessingService implements IJsonProcessingService {
-  constructor() {}
+  constructor() { }
 
   flattenJSON(obj: any, res: any, extraKey = ''): any {
     for (let key in obj) {
@@ -21,6 +21,7 @@ export class JsonProcessingService implements IJsonProcessingService {
   processJson(obj: any): any {
     const JSON_Obj = this.flattenJSON(obj, {});
     let group = {} as Group;
+    let result: Group[] = [];
     group.properties = [];
     for (var k in JSON_Obj) {
       let properties: Property = {
@@ -29,6 +30,7 @@ export class JsonProcessingService implements IJsonProcessingService {
       };
       group.properties.push(properties);
     }
-    return group;
+    result.push(group)
+    return result;
   }
 }

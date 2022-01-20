@@ -1,4 +1,4 @@
 export interface IDataIngestionService {
 
-    ingest(obj: any): any
+    ingest(obj: any, teamId: string): any
 }
