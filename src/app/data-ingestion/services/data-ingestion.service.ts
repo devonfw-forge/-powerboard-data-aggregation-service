@@ -72,24 +72,43 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       const team = await this.teamRepository.findOne({ where: { id: teamId } });
       sprint.team = team!;
       sprintArray.push(sprint);
+      const sprintSnapshot = this.createSprintSnapshotEntity(sprint);
+      console.log(sprint);
+      console.log(sprintSnapshot);
+      const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(sprint, sprintSnapshot);
+      console.log(sprintSnapshotMetric);
+
+      const result = await this.persistEntities(sprint, sprintSnapshot, sprintSnapshotMetric);
+      console.log(result);
       // console.log(sprint);
     }
     await this.sprintRepository.findOne('20155bf8-ada5-495c-8019-8d7ab76d488e');
     console.log(sprintArray);
-    const sprintSnapshotArray = this.createSprintSnapshotEntity(sprintArray);
-    console.log(sprintSnapshotArray);
+
     return sprintArray;
   }
+  async persistEntities(sprint: Sprint, sprintSnapshot: SprintSnapshot, sprintSnapshotMetric: string) {
+    console.log(sprint);
+    console.log(sprintSnapshot);
+    console.log(sprintSnapshotMetric);
+    return 'will return boolean';
+  }
 
-  createSprintSnapshotEntity(sprintArray: Sprint[]): SprintSnapshot[] {
-    let sprintSnapshotArray: SprintSnapshot[] = [];
-    for (let sprint of sprintArray) {
-      let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
-      sprintSnapshot.sprint = sprint;
-      sprintSnapshot.date_time = '';
-      sprintSnapshotArray.push(sprintSnapshot);
-    }
-    return sprintSnapshotArray;
+  async createSprintSnapshotMetricEntity(sprint: Sprint, sprintSnapshot: SprintSnapshot) {
+    console.log(sprint);
+    console.log(sprintSnapshot);
+    return 'sprint snapshot metric entity';
+  }
+
+  createSprintSnapshotEntity(sprint: Sprint): SprintSnapshot {
+    //let sprintSnapshotArray: SprintSnapshot[] = [];
+
+    let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
+    sprintSnapshot.sprint = sprint;
+    sprintSnapshot.date_time = '';
+    //sprintSnapshotArray.push(sprintSnapshot);
+
+    return sprintSnapshot;
   }
 }
 // console.log(sprint)
