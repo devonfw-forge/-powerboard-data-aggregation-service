@@ -3,8 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Group } from '../../file-and-json-processing/models/group';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm/repository/Repository';
+
 import { Sprint } from '../model/entities/sprint.entity';
 import { SprintSnapshot } from '../model/entities/sprintSnapshot.entity';
 import { SprintSnapshotMetric } from '../model/entities/sprintSnapshotMetric.entity';
@@ -49,16 +48,12 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         //   sprint = {} as Sprint
         // }
         if (actualKey === 'id') {
-          // console.log(object.value);
           sprint.sprint_number = Number(object.value);
         }
         if (actualKey === 'startDate') {
-          // console.log(object.value);
           sprint.start_date = object.value;
         }
         if (actualKey === 'state') {
-          // console.log(object.value);
-
           if (object.value === 'active') {
             object.value = 'Completed';
           } else {
@@ -68,11 +63,9 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           sprint.status = sprintStatus!.id;
         }
         if (actualKey === 'endDate') {
-          // console.log(object.value);
           sprint.end_date = object.value;
         }
         if (actualKey === 'workUnit') {
-          // console.log(object.value);
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
           console.log('workkkk unitttt');
           console.log(sprintWorkUnit);
@@ -83,8 +76,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === 'metric') {
           const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
-          console.log('Testtttttttttttttttt');
-          console.log(sprintMetricObj);
+
           if (sprintMetricObj !== undefined) {
             sprintMetric = sprintMetricObj;
           }
@@ -94,50 +86,28 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       sprint.team = team!;
       sprintArray.push(sprint);
 
-      // const sprintSnapshot = this.createSprintSnapshotEntity(sprint);
-      // console.log(sprint);
-      // console.log("#@@@@@@@@@@@@@@@@@@@@@@@")
-      // console.log(sprintSnapshot);
-      // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%")
-      // const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
-      //   sprintSnapshotMetricValue,
-      //   sprintSnapshot,
-      //   sprintMetric,
-      // );
-
-      // console.log(sprintSnapshotMetric);
-
-      //  console.log(sprintSnapshotMetric);
-
       const result = await this.persistEntities(sprint, sprintSnapshotMetricValue, sprintMetric);
       console.log(result);
-      // console.log(sprint);
     }
-    //await this.sprintRepository.findOne('20155bf8-ada5-495c-8019-8d7ab76d488e');
-    // console.log(sprintArray);
 
     return sprintArray;
   }
   async persistEntities(sprint: Sprint, sprintSnapshotMetricValue: string, sprintMetric: SprintMetric) {
     const sprintCreated = await this.sprintRepository.save(sprint);
-    console.log('GGGGGGGGGGGGGGGGGGGGGGG');
-    console.log(sprintCreated);
+
     let sprintSnapshotMetricSaved;
     if (sprintCreated) {
-      console.log('sprint snapshottttt');
-
       const sprintSnapshot = this.createSprintSnapshotEntity(sprintCreated);
 
       const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
-      console.log(sprintSnapshotSaved);
+
       if (sprintSnapshotSaved) {
         const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
           sprintSnapshotMetricValue,
           sprintSnapshotSaved,
           sprintMetric,
         );
-        console.log('metriccccccccccc');
-        console.log(sprintSnapshotMetric);
+
         sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
       }
     }
@@ -146,25 +116,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     } else {
       return 'failure';
     }
-    // console.log(sprintCreated);
-    // let sprintSnapshotMetricSaved;
-    // if (sprintCreated) {
-    //   const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
-    //   console.log("TTTTTTTTTTTTTTTTTTTT")
-    //   console.log(sprintSnapshotSaved)
-    //   if (sprintSnapshotSaved) {
-    //     sprintSnapshotMetricSaved = await this.sprintMetricRepository.save(sprintSnapshotMetric);
-    //     console.log("SSSSSSSSSSSSSSSSSSS")
-    //     console.log(sprintSnapshotMetricSaved)
-    //   }
-    // }
-    // if (sprintSnapshotMetricSaved) {
-    //   return true;
-    // }
-    // console.log(sprint);
-    // console.log(sprintSnapshot);
-    // console.log(sprintSnapshotMetric);
-    // return 'will return boolean';
   }
 
   async createSprintSnapshotMetricEntity(value: string, sprintSnapshot: SprintSnapshot, sprintMetric: SprintMetric) {
@@ -186,31 +137,3 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return sprintSnapshot;
   }
 }
-// console.log(sprint)
-
-// sprint.sprintNumber=
-// sprint.id = 0;
-// sprint.sprintNumber = 0;
-// sprint.startDate = '';
-// sprint.endDate = '';
-// sprint.state = '';
-// sprint.team = {} as Team;
-// sprint.workUnit = ''
-//   let sprintKeys = Object.keys(sprint);
-//   for (let object of processedJson.properties) {
-// let x = object.key;
-// let splittedKeys = x.split("_");
-// var actualKey = splittedKeys[splittedKeys.length - 1];
-//     console.log(actualKey);
-//     if (sprintKeys.includes(actualKey)) {
-
-//       (sprint as any)[actualKey] = object.value;
-
-//       let index = sprintKeys.indexOf(actualKey);
-//       sprintKeys.splice(index, 1);
-
-//     }
-
-//   }
-//   console.log(sprint);
-//   return sprint;
