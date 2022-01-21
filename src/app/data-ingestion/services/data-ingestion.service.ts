@@ -22,8 +22,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     @InjectRepository(Sprint) private readonly sprintRepository: Repository<Sprint>,
     @InjectRepository(SprintStatus) private readonly sprintStatusRepository: Repository<SprintStatus>,
     @InjectRepository(SprintMetric) private readonly sprintMetricRepository: Repository<SprintMetric>,
+    @InjectRepository(SprintSnapshotMetric)
+    private readonly sprintSnapshotMetricRepository: Repository<SprintSnapshotMetric>,
     @InjectRepository(SprintWorkUnit) private readonly sprintWorkUnitRepository: Repository<SprintWorkUnit>,
-    @InjectRepository(SprintWorkUnit) private readonly sprintSnapshotRepository: Repository<SprintSnapshot>,
+    @InjectRepository(SprintSnapshot) private readonly sprintSnapshotRepository: Repository<SprintSnapshot>,
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
   ) {
     super(sprintRepository);
@@ -72,6 +74,8 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         if (actualKey === 'workUnit') {
           // console.log(object.value);
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
+          console.log('workkkk unitttt');
+          console.log(sprintWorkUnit);
           sprint.work_unit = sprintWorkUnit!.id;
         }
         if (actualKey === 'value') {
@@ -79,6 +83,8 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === 'metric') {
           const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
+          console.log('Testtttttttttttttttt');
+          console.log(sprintMetricObj);
           if (sprintMetricObj !== undefined) {
             sprintMetric = sprintMetricObj;
           }
@@ -87,48 +93,74 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       const team = await this.teamRepository.findOne({ where: { id: teamId } });
       sprint.team = team!;
       sprintArray.push(sprint);
-      const sprintSnapshot = this.createSprintSnapshotEntity(sprint);
-      console.log(sprint);
-      console.log("#@@@@@@@@@@@@@@@@@@@@@@@")
-      console.log(sprintSnapshot);
-      console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%")
-      const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
-        sprintSnapshotMetricValue,
-        sprintSnapshot,
-        sprintMetric,
-      );
 
-      console.log(sprintSnapshotMetric);
+      // const sprintSnapshot = this.createSprintSnapshotEntity(sprint);
+      // console.log(sprint);
+      // console.log("#@@@@@@@@@@@@@@@@@@@@@@@")
+      // console.log(sprintSnapshot);
+      // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%")
+      // const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
+      //   sprintSnapshotMetricValue,
+      //   sprintSnapshot,
+      //   sprintMetric,
+      // );
+
+      // console.log(sprintSnapshotMetric);
 
       //  console.log(sprintSnapshotMetric);
 
-      const result = await this.persistEntities(sprint, sprintSnapshot, sprintSnapshotMetric);
+      const result = await this.persistEntities(sprint, sprintSnapshotMetricValue, sprintMetric);
       console.log(result);
       // console.log(sprint);
     }
-    await this.sprintRepository.findOne('20155bf8-ada5-495c-8019-8d7ab76d488e');
+    //await this.sprintRepository.findOne('20155bf8-ada5-495c-8019-8d7ab76d488e');
     // console.log(sprintArray);
 
     return sprintArray;
   }
-  async persistEntities(sprint: Sprint, sprintSnapshot: SprintSnapshot, sprintSnapshotMetric: SprintSnapshotMetric) {
+  async persistEntities(sprint: Sprint, sprintSnapshotMetricValue: string, sprintMetric: SprintMetric) {
     const sprintCreated = await this.sprintRepository.save(sprint);
-    console.log("GGGGGGGGGGGGGGGGGGGGGGG")
+    console.log('GGGGGGGGGGGGGGGGGGGGGGG');
     console.log(sprintCreated);
     let sprintSnapshotMetricSaved;
     if (sprintCreated) {
+      console.log('sprint snapshottttt');
+
+      const sprintSnapshot = this.createSprintSnapshotEntity(sprintCreated);
+
       const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
-      console.log("TTTTTTTTTTTTTTTTTTTT")
-      console.log(sprintSnapshotSaved)
+      console.log(sprintSnapshotSaved);
       if (sprintSnapshotSaved) {
-        sprintSnapshotMetricSaved = await this.sprintMetricRepository.save(sprintSnapshotMetric);
-        console.log("SSSSSSSSSSSSSSSSSSS")
-        console.log(sprintSnapshotMetricSaved)
+        const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
+          sprintSnapshotMetricValue,
+          sprintSnapshotSaved,
+          sprintMetric,
+        );
+        console.log('metriccccccccccc');
+        console.log(sprintSnapshotMetric);
+        sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
       }
     }
     if (sprintSnapshotMetricSaved) {
-      return true;
+      return 'success';
+    } else {
+      return 'failure';
     }
+    // console.log(sprintCreated);
+    // let sprintSnapshotMetricSaved;
+    // if (sprintCreated) {
+    //   const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
+    //   console.log("TTTTTTTTTTTTTTTTTTTT")
+    //   console.log(sprintSnapshotSaved)
+    //   if (sprintSnapshotSaved) {
+    //     sprintSnapshotMetricSaved = await this.sprintMetricRepository.save(sprintSnapshotMetric);
+    //     console.log("SSSSSSSSSSSSSSSSSSS")
+    //     console.log(sprintSnapshotMetricSaved)
+    //   }
+    // }
+    // if (sprintSnapshotMetricSaved) {
+    //   return true;
+    // }
     // console.log(sprint);
     // console.log(sprintSnapshot);
     // console.log(sprintSnapshotMetric);
