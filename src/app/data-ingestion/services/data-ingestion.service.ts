@@ -23,6 +23,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     @InjectRepository(SprintStatus) private readonly sprintStatusRepository: Repository<SprintStatus>,
     @InjectRepository(SprintMetric) private readonly sprintMetricRepository: Repository<SprintMetric>,
     @InjectRepository(SprintWorkUnit) private readonly sprintWorkUnitRepository: Repository<SprintWorkUnit>,
+    @InjectRepository(SprintWorkUnit) private readonly sprintSnapshotRepository: Repository<SprintSnapshot>,
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
   ) {
     super(sprintRepository);
@@ -46,15 +47,15 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         //   sprint = {} as Sprint
         // }
         if (actualKey === 'id') {
-          console.log(object.value);
+          // console.log(object.value);
           sprint.sprint_number = Number(object.value);
         }
         if (actualKey === 'startDate') {
-          console.log(object.value);
+          // console.log(object.value);
           sprint.start_date = object.value;
         }
         if (actualKey === 'state') {
-          console.log(object.value);
+          // console.log(object.value);
 
           if (object.value === 'active') {
             object.value = 'Completed';
@@ -65,11 +66,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           sprint.status = sprintStatus!.id;
         }
         if (actualKey === 'endDate') {
-          console.log(object.value);
+          // console.log(object.value);
           sprint.end_date = object.value;
         }
         if (actualKey === 'workUnit') {
-          console.log(object.value);
+          // console.log(object.value);
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
           sprint.work_unit = sprintWorkUnit!.id;
         }
@@ -88,28 +89,50 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       sprintArray.push(sprint);
       const sprintSnapshot = this.createSprintSnapshotEntity(sprint);
       console.log(sprint);
+      console.log("#@@@@@@@@@@@@@@@@@@@@@@@")
       console.log(sprintSnapshot);
+      console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%")
       const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
         sprintSnapshotMetricValue,
         sprintSnapshot,
         sprintMetric,
       );
+
       console.log(sprintSnapshotMetric);
+
+      //  console.log(sprintSnapshotMetric);
 
       const result = await this.persistEntities(sprint, sprintSnapshot, sprintSnapshotMetric);
       console.log(result);
       // console.log(sprint);
     }
     await this.sprintRepository.findOne('20155bf8-ada5-495c-8019-8d7ab76d488e');
-    console.log(sprintArray);
+    // console.log(sprintArray);
 
     return sprintArray;
   }
   async persistEntities(sprint: Sprint, sprintSnapshot: SprintSnapshot, sprintSnapshotMetric: SprintSnapshotMetric) {
-    console.log(sprint);
-    console.log(sprintSnapshot);
-    console.log(sprintSnapshotMetric);
-    return 'will return boolean';
+    const sprintCreated = await this.sprintRepository.save(sprint);
+    console.log("GGGGGGGGGGGGGGGGGGGGGGG")
+    console.log(sprintCreated);
+    let sprintSnapshotMetricSaved;
+    if (sprintCreated) {
+      const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
+      console.log("TTTTTTTTTTTTTTTTTTTT")
+      console.log(sprintSnapshotSaved)
+      if (sprintSnapshotSaved) {
+        sprintSnapshotMetricSaved = await this.sprintMetricRepository.save(sprintSnapshotMetric);
+        console.log("SSSSSSSSSSSSSSSSSSS")
+        console.log(sprintSnapshotMetricSaved)
+      }
+    }
+    if (sprintSnapshotMetricSaved) {
+      return true;
+    }
+    // console.log(sprint);
+    // console.log(sprintSnapshot);
+    // console.log(sprintSnapshotMetric);
+    // return 'will return boolean';
   }
 
   async createSprintSnapshotMetricEntity(value: string, sprintSnapshot: SprintSnapshot, sprintMetric: SprintMetric) {
@@ -125,7 +148,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
     let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
     sprintSnapshot.sprint = sprint;
-    sprintSnapshot.date_time = '';
+    sprintSnapshot.date_time = sprint.start_date;
     //sprintSnapshotArray.push(sprintSnapshot);
 
     return sprintSnapshot;
