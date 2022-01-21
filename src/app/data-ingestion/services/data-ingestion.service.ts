@@ -7,6 +7,8 @@ import { Group } from '../../file-and-json-processing/models/group';
 // import { Repository } from 'typeorm/repository/Repository';
 import { Sprint } from '../model/entities/sprint.entity';
 import { SprintSnapshot } from '../model/entities/sprintSnapshot.entity';
+import { SprintSnapshotMetric } from '../model/entities/sprintSnapshotMetric.entity';
+import { SprintMetric } from '../model/entities/sprint_metric.entity';
 import { SprintStatus } from '../model/entities/sprint_status.entity';
 import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
 import { Team } from '../model/entities/team.entity';
@@ -19,6 +21,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   constructor(
     @InjectRepository(Sprint) private readonly sprintRepository: Repository<Sprint>,
     @InjectRepository(SprintStatus) private readonly sprintStatusRepository: Repository<SprintStatus>,
+    @InjectRepository(SprintMetric) private readonly sprintMetricRepository: Repository<SprintMetric>,
     @InjectRepository(SprintWorkUnit) private readonly sprintWorkUnitRepository: Repository<SprintWorkUnit>,
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
   ) {
@@ -29,6 +32,8 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     let sprintArray: Sprint[] = [];
     for (let group of processedJson) {
       let sprint: Sprint = {} as Sprint;
+      let sprintSnapshotMetricValue: string = '';
+      let sprintMetric: SprintMetric = {} as SprintMetric;
       //let index = 0;
       for (let object of group.properties) {
         let key = object.key;
@@ -68,6 +73,15 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
           sprint.work_unit = sprintWorkUnit!.id;
         }
+        if (actualKey === 'value') {
+          sprintSnapshotMetricValue = object.value;
+        }
+        if (actualKey === 'metric') {
+          const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
+          if (sprintMetricObj !== undefined) {
+            sprintMetric = sprintMetricObj;
+          }
+        }
       }
       const team = await this.teamRepository.findOne({ where: { id: teamId } });
       sprint.team = team!;
@@ -75,7 +89,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       const sprintSnapshot = this.createSprintSnapshotEntity(sprint);
       console.log(sprint);
       console.log(sprintSnapshot);
-      const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(sprint, sprintSnapshot);
+      const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
+        sprintSnapshotMetricValue,
+        sprintSnapshot,
+        sprintMetric,
+      );
       console.log(sprintSnapshotMetric);
 
       const result = await this.persistEntities(sprint, sprintSnapshot, sprintSnapshotMetric);
@@ -87,17 +105,19 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
     return sprintArray;
   }
-  async persistEntities(sprint: Sprint, sprintSnapshot: SprintSnapshot, sprintSnapshotMetric: string) {
+  async persistEntities(sprint: Sprint, sprintSnapshot: SprintSnapshot, sprintSnapshotMetric: SprintSnapshotMetric) {
     console.log(sprint);
     console.log(sprintSnapshot);
     console.log(sprintSnapshotMetric);
     return 'will return boolean';
   }
 
-  async createSprintSnapshotMetricEntity(sprint: Sprint, sprintSnapshot: SprintSnapshot) {
-    console.log(sprint);
-    console.log(sprintSnapshot);
-    return 'sprint snapshot metric entity';
+  async createSprintSnapshotMetricEntity(value: string, sprintSnapshot: SprintSnapshot, sprintMetric: SprintMetric) {
+    let sprintSnapshotMetric: SprintSnapshotMetric = {} as SprintSnapshotMetric;
+    sprintSnapshotMetric.value = value;
+    sprintSnapshotMetric.snapshot = sprintSnapshot;
+    sprintSnapshotMetric.metric = sprintMetric;
+    return sprintSnapshotMetric;
   }
 
   createSprintSnapshotEntity(sprint: Sprint): SprintSnapshot {
