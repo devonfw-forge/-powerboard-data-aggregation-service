@@ -1,4 +1,5 @@
-export interface IFileProcessingService {
+import { Group } from '../models/group';
 
-    processFile(): any
+export interface IFileProcessingService {
+  processXLSXFile(file: any): Group[];
 }
