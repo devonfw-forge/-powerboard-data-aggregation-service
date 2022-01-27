@@ -136,4 +136,17 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
     return sprintSnapshot;
   }
+
+  // async ingestCodeQuality(processedJson: Group[], teamId: string) {
+  //   let sprintArray: CodeQuality[] = [];
+  //   for (let group of processedJson) {
+  //     let sprint: Sprint = {} as Sprint;
+  //     let sprintSnapshotMetricValue: string = '';
+  //     let sprintMetric: SprintMetric = {} as SprintMetric;
+  //     //let index = 0;
+  //     for (let object of group.properties) {
+  //       let key = object.key;
+  //       let splittedKeys = key.split('_');
+  //       var actualKey = splittedKeys[splittedKeys.length - 1];
+  // }
 }
