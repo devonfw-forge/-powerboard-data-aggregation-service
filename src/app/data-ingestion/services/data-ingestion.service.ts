@@ -137,6 +137,15 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return sprintSnapshot;
   }
 
+  async findTeamUsingTeamId(teamId: string): Promise<string | Team> {
+    const team = await this.teamRepository.findOne({ where: { id: teamId } });
+    if (team) {
+      return team;
+    } else {
+      return 'team not found';
+    }
+  }
+
   // async ingestCodeQuality(processedJson: Group[], teamId: string) {
   //   let sprintArray: CodeQuality[] = [];
   //   for (let group of processedJson) {
