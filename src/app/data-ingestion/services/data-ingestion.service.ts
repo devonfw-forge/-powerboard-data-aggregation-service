@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Group } from '../../file-and-json-processing/models/group';
+import { CodeQuality } from '../model/dto/code-quality';
 
 import { Sprint } from '../model/entities/sprint.entity';
 import { SprintSnapshot } from '../model/entities/sprintSnapshot.entity';
@@ -137,16 +138,41 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return sprintSnapshot;
   }
 
-  // async ingestCodeQuality(processedJson: Group[], teamId: string) {
-  //   let sprintArray: CodeQuality[] = [];
-  //   for (let group of processedJson) {
-  //     let sprint: Sprint = {} as Sprint;
-  //     let sprintSnapshotMetricValue: string = '';
-  //     let sprintMetric: SprintMetric = {} as SprintMetric;
-  //     //let index = 0;
-  //     for (let object of group.properties) {
-  //       let key = object.key;
-  //       let splittedKeys = key.split('_');
-  //       var actualKey = splittedKeys[splittedKeys.length - 1];
-  // }
+  async ingestCodeQuality(processedJson: Group[], teamId: string) {
+    console.log(teamId);
+    let codeQualityArray: CodeQuality[] = [];
+    for (let group of processedJson) {
+      console.log("*************");
+      console.log(group);
+      //let sprint: Sprint = {} as Sprint;
+      let codeQuality: CodeQuality = {} as CodeQuality
+      // let sprintSnapshotMetricValue: string = '';
+      // let sprintMetric: SprintMetric = {} as SprintMetric;
+      //let index = 0;
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === "bugs") {
+          codeQuality.bugs = Number(object.value);
+        }
+        if (actualKey === "id") {
+          codeQuality.id = Number(object.value);
+        }
+        if (actualKey === "codeSmells") {
+          codeQuality.codeSmells = Number(object.value);
+        }
+        if (actualKey === "codeCoverage") {
+          codeQuality.codeCoverage = Number(object.value);
+        }
+        if (actualKey === "qualityGateStatus") {
+          codeQuality.status = object.value;
+        }
+      }
+      codeQualityArray.push(codeQuality);
+    }
+    console.log("(((((((((((((((((((((((")
+    console.log(codeQualityArray);
+    return codeQualityArray;
+  }
 }
