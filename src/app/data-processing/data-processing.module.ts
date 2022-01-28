@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
+import { DataIngestionModule } from '../data-ingestion/data-ingestion.module';
 import { FileAndJsonProcessingModule } from '../file-and-json-processing/file-and-json-processing.module';
 import { DataProcessingController } from './controllers/dataProcessing.controller';
 import { DataProcessingService } from './services/data-processing.service';
 
 @Module({
-  imports: [FileAndJsonProcessingModule],
+  imports: [FileAndJsonProcessingModule, DataIngestionModule],
   providers: [
     {
       provide: 'IDataProcessingService',
@@ -14,4 +15,4 @@ import { DataProcessingService } from './services/data-processing.service';
   controllers: [DataProcessingController],
   exports: ['IDataProcessingService'],
 })
-export class DataProcessingModule {}
+export class DataProcessingModule { }
