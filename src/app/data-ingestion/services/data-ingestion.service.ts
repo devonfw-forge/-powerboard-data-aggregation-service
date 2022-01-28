@@ -141,28 +141,30 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     console.log(teamId);
     let codeQualityArray: CodeQualitySnapshot[] = [] as CodeQualitySnapshot[];
     for (let group of processedJson) {
-
-      let codeQuality: CodeQualitySnapshot = {} as CodeQualitySnapshot
+      console.log('*************');
+      console.log(group);
+      //let sprint: Sprint = {} as Sprint;
+      let codeQuality: CodeQualitySnapshot = {} as CodeQualitySnapshot;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === "bugs") {
+        if (actualKey === 'bugs') {
           codeQuality.bugs = Number(object.value);
         }
-        if (actualKey === "key") {
+        if (actualKey === 'key') {
           codeQuality.id = object.value;
         }
-        if (actualKey === "codeSmells") {
+        if (actualKey === 'codeSmells') {
           codeQuality.codeSmells = Number(object.value);
         }
-        if (actualKey === "codeCoverage") {
+        if (actualKey === 'codeCoverage') {
           codeQuality.code_coverage = Number(object.value);
         }
-        if (actualKey === "qualityGateStatus") {
+        if (actualKey === 'qualityGateStatus') {
           codeQuality.status = object.value;
         }
-        if (actualKey === "analysisDate") {
+        if (actualKey === 'analysisDate') {
           codeQuality.snapshot_time = object.value;
         }
       }
