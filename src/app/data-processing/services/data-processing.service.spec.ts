@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  CodeQualitySnapshotRepositoryMock,
   SprintMetricRepositoryMock,
   SprintRepositoryMock,
   SprintSnapshotMetricRepositoryMock,
@@ -21,6 +22,7 @@ import { SprintSnapshotMetric } from '../../data-ingestion/model/entities/sprint
 import { SprintWorkUnit } from '../../data-ingestion/model/entities/sprint_work_unit.entity';
 import { SprintSnapshot } from '../../data-ingestion/model/entities/sprintSnapshot.entity';
 import { SprintStatus } from '../../data-ingestion/model/entities/sprint_status.entity';
+import { CodeQualitySnapshot } from '../../data-ingestion/model/entities/code-quality-snapshot.entity';
 describe('DataProcessingService', () => {
   let dataProcessingService: DataProcessingService;
   let dataIngestionService: DataIngestionService;
@@ -34,6 +36,7 @@ describe('DataProcessingService', () => {
   let sprintWorkUnitRepo: SprintWorkUnitRepositoryMock;
   let sprintSnapshotRepo: SprintSnapshotRepositoryMock;
   let sprintStatusRepo: SprintStatusRepositoryMock;
+  let codeQualitySnapshotRepo: CodeQualitySnapshotRepositoryMock;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -86,6 +89,10 @@ describe('DataProcessingService', () => {
           provide: getRepositoryToken(SprintStatus),
           useClass: SprintStatusRepositoryMock,
         },
+        {
+          provide: getRepositoryToken(CodeQualitySnapshot),
+          useClass: CodeQualitySnapshotRepositoryMock,
+        },
       ],
     }).compile();
 
@@ -101,6 +108,7 @@ describe('DataProcessingService', () => {
     sprintWorkUnitRepo = module.get<SprintWorkUnitRepositoryMock>(getRepositoryToken(SprintWorkUnit));
     sprintStatusRepo = module.get<SprintStatusRepositoryMock>(getRepositoryToken(SprintStatus));
     sprintSnapshotRepo = module.get<SprintSnapshotRepositoryMock>(getRepositoryToken(SprintSnapshot));
+    codeQualitySnapshotRepo = module.get<CodeQualitySnapshotRepositoryMock>(getRepositoryToken(CodeQualitySnapshot));
   });
 
   it('should be defined after module initialization', () => {
@@ -115,9 +123,10 @@ describe('DataProcessingService', () => {
     expect(sprintWorkUnitRepo).toBeDefined();
     expect(sprintSnapshotRepo).toBeDefined();
     expect(sprintStatusRepo).toBeDefined();
+    expect(codeQualitySnapshotRepo).toBeDefined();
   });
 
-  it('should process data', () => {
+  it('should process data', async () => {
     let jsonObj: any = {
       maxResults: 50,
       startAt: 0,
@@ -140,9 +149,73 @@ describe('DataProcessingService', () => {
       ],
     };
 
+    let ingestOutput: any = [
+      {
+        sprint_number: 7,
+        status: '11155bf3-ada5-495c-8019-8d7ab76d488e',
+        start_date: '2021-05-03T10:20:47.121Z',
+        end_date: '2021-05-24T10:20:00.000Z',
+        work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+        team: {
+          id: '46455bf7-ada7-495c-8019-8d7ab76d488e',
+          version: 4,
+          createdAt: '2021-10-27T09:32:05.185Z',
+          updatedAt: '2021-12-09T11:05:26.732Z',
+          name: 'Team A',
+          teamCode: '10012345',
+          projectKey: 'P12343',
+          logo: 'logo_Aa4aa8e7a-85d6-4b75-8f93-6a11dee9b13c.png',
+          isStatusChanged: false,
+          ad_center: {
+            id: '99055bf7-ada7-495c-8019-8d7ab62d488e',
+            version: 1,
+            createdAt: '2021-10-27T09:32:05.185Z',
+            updatedAt: '2021-10-27T09:32:05.185Z',
+            name: 'ADCenter Bangalore',
+          },
+          team_status: {
+            id: 3,
+            status: 'potential_risks',
+            description: 'If everything is not good',
+          },
+        },
+        id: '2de76983-a0ff-41df-8457-b624ea76c661',
+        version: 1,
+        createdAt: '2022-01-31T17:44:49.942Z',
+        updatedAt: '2022-01-31T17:44:49.942Z',
+      },
+    ];
+
     jest.spyOn(jsonProcessingService, 'processJson').mockResolvedValue(jsonObj);
-    const ingestedData = jest.spyOn(dataIngestionService, 'ingestCodeQuality').mockResolvedValue(jsonObj);
-    const result = dataProcessingService.processData(jsonObj, 'mockteamId');
-    expect(result).toEqual(ingestedData);
+    jest.spyOn(dataProcessingService, 'ingestEntities').mockResolvedValue(ingestOutput);
+    /* const ingestedData = jest.spyOn(dataIngestionService, 'ingestCodeQuality').mockResolvedValue(ingestOutput); */
+    const result = await dataProcessingService.processJSON(jsonObj, 'mockTeamId', 'mockType');
+    expect(result).toEqual(ingestOutput);
+  });
+
+  it('should process xlsx data', async () => {
+    let file: any = { file: 'mockXlsxFile' };
+    let sampleFile: any = [];
+    let ingestOutput: any = 'MockOutput';
+    jest.spyOn(fileProcessingService, 'processXLSXFile').mockResolvedValue(sampleFile);
+    jest.spyOn(dataProcessingService, 'ingestEntities').mockResolvedValue(ingestOutput);
+    const result = await dataProcessingService.processXLSXfile(file, 'mockTeamId', 'mockType');
+    expect(result).toEqual(ingestOutput);
+  });
+
+  it('should ingest jira entities ', async () => {
+    let jiraData: any = 'MockJiraProcessedData';
+    let processedData: any = 'MockProcessedjiraData';
+    jest.spyOn(dataIngestionService, 'ingestJira').mockResolvedValue(jiraData);
+    const result = await dataProcessingService.ingestEntities(processedData, 'jira', 'mockTeamId');
+    expect(result).toEqual(jiraData);
+  });
+
+  it('should ingest code Quality entities ', async () => {
+    let sonarData: any = 'MockCodeQualitiProcessedData';
+    let processedData: any = 'MockProcessedCodeQualityData';
+    jest.spyOn(dataIngestionService, 'ingestCodeQuality').mockResolvedValue(sonarData);
+    const result = await dataProcessingService.ingestEntities(processedData, 'sonar', 'mockTeamId');
+    expect(result).toEqual(sonarData);
   });
 });

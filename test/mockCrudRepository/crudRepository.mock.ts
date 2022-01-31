@@ -43,6 +43,7 @@ export class SprintSnapshotMetricRepositoryMock extends MockRepository {}
 export class SprintWorkUnitRepositoryMock extends MockRepository {}
 export class SprintSnapshotRepositoryMock extends MockRepository {}
 export class SprintStatusRepositoryMock extends MockRepository {}
+export class CodeQualitySnapshotRepositoryMock extends MockRepository {}
 
 // export class BusinessUnitRepositoryMock extends MockRepository { }
 // export class UserRepositoryMock extends MockRepository { }
