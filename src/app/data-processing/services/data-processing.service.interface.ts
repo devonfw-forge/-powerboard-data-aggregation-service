@@ -1,4 +1,4 @@
 export interface IDataProcessingService {
-  processData(obj: any, teamId: string): any;
-  processXLSXfile(file: any, teamId: string): any;
+  processJSON(obj: any, teamId: string, componentType: string): any;
+  processXLSXfile(file: any, teamId: string, componentType: string): any;
 }

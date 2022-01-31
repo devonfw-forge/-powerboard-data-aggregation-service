@@ -6,20 +6,26 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class DataProcessingController {
   constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) {}
 
-  @Post('processJson/:teamId')
-  async processData(@Body() obj: any, @Param('teamId') teamId: string, @Response() res: eResponse): Promise<any> {
-    const result = await this.dataProcessingService.processData(obj, teamId);
+  @Post('processJson/:type/:teamId')
+  async processData(
+    @Body() obj: any,
+    @Param('type') type: string,
+    @Param('teamId') teamId: string,
+    @Response() res: eResponse,
+  ): Promise<any> {
+    const result = await this.dataProcessingService.processJSON(obj, teamId, type);
     res.status(200).json(result);
   }
-  @Post('processFile/:teamId')
+  @Post('processFile/:type/:teamId')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFileXlsxp(
     @UploadedFile() file: any,
     @Param('teamId') teamId: string,
+    @Param('type') type: string,
     @Response() res: eResponse,
   ): Promise<void> {
     console.log(file);
-    const result = await this.dataProcessingService.processXLSXfile(file, teamId);
+    const result = await this.dataProcessingService.processXLSXfile(file, teamId, type);
     res.status(201).json(result);
   }
 }
