@@ -26,11 +26,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     @InjectRepository(SprintWorkUnit) private readonly sprintWorkUnitRepository: Repository<SprintWorkUnit>,
     @InjectRepository(SprintSnapshot) private readonly sprintSnapshotRepository: Repository<SprintSnapshot>,
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
+    @InjectRepository(CodeQualitySnapshot)
+    private readonly codeQualitySnapshotRepository: Repository<CodeQualitySnapshot>,
   ) {
     super(sprintRepository);
   }
 
-  async ingest(processedJson: Group[], teamId: string): Promise<any> {
+  async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
     let sprintArray: Sprint[] = [];
     for (let group of processedJson) {
       let sprint: Sprint = {} as Sprint;
@@ -152,9 +154,9 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         if (actualKey === 'bugs') {
           codeQuality.bugs = Number(object.value);
         }
-        if (actualKey === 'key') {
-          codeQuality.id = object.value;
-        }
+        // if (actualKey === 'key') {
+        //   codeQuality.id = object.value;
+        // }
         if (actualKey === 'codeSmells') {
           codeQuality.codeSmells = Number(object.value);
         }
@@ -172,10 +174,18 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       if (team) {
         codeQuality.team = team;
       }
-      codeQualityArray.push(codeQuality);
+      console.log(codeQuality);
+      const codeQualitySnapshotSaved = await this.persistCodeQuality(codeQuality);
+      codeQualityArray.push(codeQualitySnapshotSaved);
     }
 
     return codeQualityArray;
+  }
+
+  async persistCodeQuality(codeQualityEntity: CodeQualitySnapshot) {
+    console.log('check');
+    const codeQualitySnapshotSaved = await this.codeQualitySnapshotRepository.save(codeQualityEntity);
+    return codeQualitySnapshotSaved;
   }
 
   async findTeamUsingTeamId(teamId: string): Promise<string | Team> {
