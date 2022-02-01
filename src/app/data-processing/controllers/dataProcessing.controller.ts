@@ -4,7 +4,7 @@ import { Response as eResponse } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('data-processing')
 export class DataProcessingController {
-  constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) {}
+  constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) { }
 
   @Post('processJson/:type/:teamId')
   async processData(

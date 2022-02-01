@@ -38,17 +38,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       let sprint: Sprint = {} as Sprint;
       let sprintSnapshotMetricValue: string = '';
       let sprintMetric: SprintMetric = {} as SprintMetric;
-      //let index = 0;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        // index = Number(splittedKeys[splittedKeys.length - 2]);
-        // if (sprintArray.length === index - 1) {
-        //   console.log(index);
-        //   sprintArray[index - 1] = sprint;
-        //   sprint = {} as Sprint
-        // }
+
         if (actualKey === 'id') {
           sprint.sprint_number = Number(object.value);
         }
@@ -95,21 +89,19 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return sprintArray;
   }
   async persistEntities(sprint: Sprint, sprintSnapshotMetricValue: string, sprintMetric: SprintMetric) {
+
     const sprintCreated = await this.sprintRepository.save(sprint);
 
     let sprintSnapshotMetricSaved;
     if (sprintCreated) {
       const sprintSnapshot = this.createSprintSnapshotEntity(sprintCreated);
-
       const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
-
       if (sprintSnapshotSaved) {
         const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
           sprintSnapshotMetricValue,
           sprintSnapshotSaved,
           sprintMetric,
         );
-
         sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
       }
     }
@@ -129,13 +121,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   }
 
   createSprintSnapshotEntity(sprint: Sprint): SprintSnapshot {
-    //let sprintSnapshotArray: SprintSnapshot[] = [];
 
     let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
     sprintSnapshot.sprint = sprint;
     sprintSnapshot.date_time = sprint.start_date;
-    //sprintSnapshotArray.push(sprintSnapshot);
-
     return sprintSnapshot;
   }
 

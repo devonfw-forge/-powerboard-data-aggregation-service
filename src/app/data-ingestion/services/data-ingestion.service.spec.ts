@@ -13,8 +13,11 @@ import { SprintSnapshotMetric } from '../../data-ingestion/model/entities/sprint
 import { SprintWorkUnit } from '../../data-ingestion/model/entities/sprint_work_unit.entity';
 import { SprintSnapshot } from '../../data-ingestion/model/entities/sprintSnapshot.entity';
 import { SprintStatus } from '../../data-ingestion/model/entities/sprint_status.entity';
-import { SprintRepositoryMock, TeamRepositoryMock, SprintMetricRepositoryMock, SprintSnapshotMetricRepositoryMock, SprintWorkUnitRepositoryMock, SprintSnapshotRepositoryMock, SprintStatusRepositoryMock } from '../../../../test/mockCrudRepository/crudRepository.mock';
+import { SprintRepositoryMock, TeamRepositoryMock, SprintMetricRepositoryMock, SprintSnapshotMetricRepositoryMock, SprintWorkUnitRepositoryMock, SprintSnapshotRepositoryMock, SprintStatusRepositoryMock, CodeQualitySnapshotRepositoryMock } from '../../../../test/mockCrudRepository/crudRepository.mock';
 import { DataProcessingService } from '../../data-processing/services/data-processing.service';
+// import { ADCenter } from '../model/entities/ad-center.entity';
+// import { TeamStatus } from '../model/entities/team_status.entity';
+import { CodeQualitySnapshot } from '../model/entities/code-quality-snapshot.entity';
 
 describe('DataIngestionService', () => {
     let dataIngestionService: DataIngestionService;
@@ -26,7 +29,7 @@ describe('DataIngestionService', () => {
     let sprintWorkUnitRepo: SprintWorkUnitRepositoryMock;
     let sprintSnapshotRepo: SprintSnapshotRepositoryMock;
     let sprintStatusRepo: SprintStatusRepositoryMock;
-
+    let codeQualitySnapshotRepo: CodeQualitySnapshotRepositoryMock;
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -75,6 +78,10 @@ describe('DataIngestionService', () => {
                     useClass: SprintSnapshotRepositoryMock,
                 },
                 {
+                    provide: getRepositoryToken(CodeQualitySnapshot),
+                    useClass: CodeQualitySnapshotRepositoryMock,
+                },
+                {
                     provide: getRepositoryToken(SprintStatus),
                     useClass: SprintStatusRepositoryMock,
                 },
@@ -92,6 +99,7 @@ describe('DataIngestionService', () => {
         sprintWorkUnitRepo = module.get<SprintWorkUnitRepositoryMock>(getRepositoryToken(SprintWorkUnit));
         sprintStatusRepo = module.get<SprintStatusRepositoryMock>(getRepositoryToken(SprintStatus));
         sprintSnapshotRepo = module.get<SprintSnapshotRepositoryMock>(getRepositoryToken(SprintSnapshot));
+        codeQualitySnapshotRepo = module.get<CodeQualitySnapshotRepositoryMock>(getRepositoryToken(CodeQualitySnapshot));
     });
 
     it('should be defined after module initialization', () => {
@@ -104,9 +112,98 @@ describe('DataIngestionService', () => {
         expect(sprintWorkUnitRepo).toBeDefined();
         expect(sprintSnapshotRepo).toBeDefined();
         expect(sprintStatusRepo).toBeDefined();
+        expect(codeQualitySnapshotRepo).toBeDefined();
     });
+    describe('persistEntities()', () => {
+        const sprint: any = {
+            sprint_number: 7,
+            status: '11155bf3-ada5-495c-8019-8d7ab76d488e',
+            start_date: '2021-05-03T10:20:47.121Z',
+            end_date: '2021-05-24T10:20:00.000Z',
+            work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+            team: {
+                id: '46455bf7-ada7-495c-8019-8d7ab76d488e',
+                version: 2,
+                createdAt: '2021-10-27T09:06:57.732Z',
+                updatedAt: '2021-10-27T09:08:19.906Z',
+                name: 'Team A',
+                teamCode: '10012345',
+                projectKey: 'P12343',
+                logo: 'logo_Aa4aa8e7a-85d6-4b75-8f93-6a11dee9b13c.png',
+                isStatusChanged: false,
+                ad_center: {
+                    id: '99055bf7-ada7-495c-8019-8d7ab62d488e',
+                    version: 1,
+                    createdAt: "2021-10-27T09:06:57.732Z",
+                    updatedAt: "2021-10-27T09:06:57.732Z",
+                    name: 'ADCenter Bangalore'
+                },
+                team_status: {
+                    id: 1,
+                    status: 'on_track',
+                    description: 'If everything is all right'
+                }
+            }
+        }
 
-    it('', async () => {
+        const sprintMetric = {
+            id: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+            version: 1,
+            createdAt: '2021-10-27T09:06:57.732Z',
+            updatedAt: '2021-10-27T09:06:57.732Z',
+            name: 'Work Committed'
+        }
 
+        it('it should be defined if all the entities get persisted', async () => {
+
+            const sprintSnapshotSaved: any = {}
+            const sprintSnapshotMetricSaved: any = {}
+            const sprintCreated: any = {}
+            const sprintSnapshot: any = {}
+            const sprintSnapshotMetricCreated: any = {}
+
+            jest.spyOn(sprintRepo, 'save').mockImplementation(() => sprintCreated);
+            jest.spyOn(dataIngestionService, 'createSprintSnapshotEntity').mockImplementation(() => sprintSnapshot);
+            jest.spyOn(sprintSnapshotRepo, 'save').mockImplementation(() => sprintSnapshotSaved);
+            jest.spyOn(dataIngestionService, 'createSprintSnapshotMetricEntity').mockImplementation(() => sprintSnapshotMetricCreated);
+            jest.spyOn(sprintSnapshotmetricRepo, 'save').mockImplementation(() => sprintSnapshotMetricSaved);
+            expect(dataIngestionService.persistEntities(sprint, '100', sprintMetric)).toBeDefined();
+            expect(dataIngestionService.persistEntities(sprint, '100', sprintMetric)).toBeTruthy();
+            const response = await dataIngestionService.persistEntities(sprint, '100', sprintMetric);
+            expect(response).toEqual('success');
+        })
+        it('it should return failure if sprint entity is not persisted', async () => {
+
+            jest.spyOn(sprintRepo, 'save').mockImplementation(undefined);
+            const response = await dataIngestionService.persistEntities(sprint, '100', sprintMetric);
+            expect(response).toEqual('failure')
+            //expect(dataIngestionService.persistEntities(sprint, '100', sprintMetric)).toBeUndefined();
+        })
+
+        it('it should return failure if sprintSnapshot entity is not persisted', async () => {
+            const sprintCreated = {}
+            const sprintSnapshot: any = {}
+            jest.spyOn(sprintRepo, 'save').mockImplementation(() => sprintCreated);
+            jest.spyOn(dataIngestionService, 'createSprintSnapshotEntity').mockImplementation(() => sprintSnapshot);
+            jest.spyOn(sprintSnapshotRepo, 'save').mockImplementation(() => undefined);
+            const response = await dataIngestionService.persistEntities(sprint, '100', sprintMetric);
+            expect(response).toEqual('failure')
+
+        })
+        it('it should return failure if sprintSnapshotMetric entity is not persisted', async () => {
+            const sprintCreated = {}
+            const sprintSnapshot: any = {}
+            const sprintSnapshotSaved: any = {}
+            const sprintSnapshotMetricCreated: any = {}
+            jest.spyOn(sprintRepo, 'save').mockImplementation(() => sprintCreated);
+            jest.spyOn(dataIngestionService, 'createSprintSnapshotEntity').mockImplementation(() => sprintSnapshot);
+            jest.spyOn(sprintSnapshotRepo, 'save').mockImplementation(() => sprintSnapshotSaved);
+            jest.spyOn(dataIngestionService, 'createSprintSnapshotMetricEntity').mockImplementation(() => sprintSnapshotMetricCreated);
+            jest.spyOn(sprintSnapshotmetricRepo, 'save').mockImplementation(undefined);
+            const response = await dataIngestionService.persistEntities(sprint, '100', sprintMetric);
+            expect(response).toEqual('failure')
+
+        })
     })
+
 })

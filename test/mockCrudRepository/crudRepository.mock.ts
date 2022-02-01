@@ -40,4 +40,5 @@ export class SprintSnapshotMetricRepositoryMock extends MockRepository { }
 export class SprintWorkUnitRepositoryMock extends MockRepository { }
 export class SprintSnapshotRepositoryMock extends MockRepository { }
 export class SprintStatusRepositoryMock extends MockRepository { }
+export class CodeQualitySnapshotRepositoryMock extends MockRepository { }
 
