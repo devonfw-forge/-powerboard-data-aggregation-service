@@ -206,4 +206,220 @@ describe('DataIngestionService', () => {
         })
     })
 
+    describe('createSprintSnapshotEntity()', () => {
+
+        it('should create and return a sprint snapshot object', async () => {
+            const sprint: any = {
+                sprint_number: 7,
+                status: '11155bf3-ada5-495c-8019-8d7ab76d488e',
+                start_date: '2021-05-03T10:20:47.121Z',
+                end_date: '2021-05-24T10:20:00.000Z',
+                work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+                team: {
+                    id: '46455bf7-ada7-495c-8019-8d7ab76d488e',
+                    version: 2,
+                    createdAt: '2021-10-27T09:06:57.732Z',
+                    updatedAt: '2021-10-27T09:08:19.906Z',
+                    name: 'Team A',
+                    teamCode: '10012345',
+                    projectKey: 'P12343',
+                    logo: 'logo_Aa4aa8e7a-85d6-4b75-8f93-6a11dee9b13c.png',
+                    isStatusChanged: false,
+                    ad_center: {
+                        id: '99055bf7-ada7-495c-8019-8d7ab62d488e',
+                        version: 1,
+                        createdAt: "2021-10-27T09:06:57.732Z",
+                        updatedAt: "2021-10-27T09:06:57.732Z",
+                        name: 'ADCenter Bangalore'
+                    },
+                    team_status: {
+                        id: 1,
+                        status: 'on_track',
+                        description: 'If everything is all right'
+                    }
+                }
+            }
+
+            const sprintSnapshot = {
+                sprint: sprint,
+                date_time: '2021-05-03T10:20:47.121Z'
+            }
+            const response = await dataIngestionService.createSprintSnapshotEntity(sprint);
+            expect(response).toEqual(sprintSnapshot)
+        })
+    })
+
+    describe('createSprintSnapshotEntity()', () => {
+        it('should create and return a sprint snapshot metric object', async () => {
+
+            const sprint: any = {
+                sprint_number: 7,
+                status: '11155bf3-ada5-495c-8019-8d7ab76d488e',
+                start_date: '2021-05-03T10:20:47.121Z',
+                end_date: '2021-05-24T10:20:00.000Z',
+                work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+                team: {
+                    id: '46455bf7-ada7-495c-8019-8d7ab76d488e',
+                    version: 2,
+                    createdAt: '2021-10-27T09:06:57.732Z',
+                    updatedAt: '2021-10-27T09:08:19.906Z',
+                    name: 'Team A',
+                    teamCode: '10012345',
+                    projectKey: 'P12343',
+                    logo: 'logo_Aa4aa8e7a-85d6-4b75-8f93-6a11dee9b13c.png',
+                    isStatusChanged: false,
+                    ad_center: {
+                        id: '99055bf7-ada7-495c-8019-8d7ab62d488e',
+                        version: 1,
+                        createdAt: "2021-10-27T09:06:57.732Z",
+                        updatedAt: "2021-10-27T09:06:57.732Z",
+                        name: 'ADCenter Bangalore'
+                    },
+                    team_status: {
+                        id: 1,
+                        status: 'on_track',
+                        description: 'If everything is all right'
+                    }
+                }
+            }
+
+            const value = '100';
+
+            const sprintMetric: any = {
+                name: 'work committed'
+            }
+            const sprintSnapshot: any = {
+                sprint: sprint,
+                date_time: '2021-05-03T10:20:47.121Z'
+            }
+            const sprintSnapshotMetric: any = {
+                value: value,
+                snapshot: sprintSnapshot,
+                metric: sprintMetric
+            }
+
+            const response = await dataIngestionService.createSprintSnapshotMetricEntity(value, sprintSnapshot, sprintMetric);
+            expect(response).toEqual(sprintSnapshotMetric)
+
+        })
+    })
+
+    describe('ingestJira()', () => {
+        it('should return sprint object', async () => {
+            //inputs
+            const teamId = '46455bf7-ada7-495c-8019-8d7ab76d488e'
+            const processedJSON: any = [
+                {
+                    properties: [
+                        { key: 'maxResults', value: 50 },
+                        { key: 'startAt', value: 0 },
+                        { key: 'isLast', value: true },
+                        { key: 'values_0_id', value: 7 },
+                        {
+                            key: 'values_0_self',
+                            value: 'https://powerboard-capgemini.atlassian.net/rest/agile/1.0/sprint/7'
+                        },
+                        { key: 'values_0_state', value: 'active' },
+                        { key: 'values_0_name', value: 'DUM Sprint 4' },
+                        { key: 'values_0_startDate', value: '2021-05-03T10:20:47.121Z' },
+                        { key: 'values_0_endDate', value: '2021-05-24T10:20:00.000Z' },
+                        { key: 'values_0_originBoardId', value: 3 },
+                        { key: 'values_0_goal', value: '' },
+                        { key: 'values_0_status', value: '' },
+                        { key: 'values_0_workUnit', value: 'hour' },
+                        { key: 'values_0_value', value: 100 },
+                        { key: 'values_0_metric', value: 'Work Committed' }
+                    ]
+                }
+            ]
+
+            const sprintStatus = {
+                id: '11155bf3-ada5-495c-8019-8d7ab76d488e',
+                version: 1,
+                createdAt: '2021-10-27T09:06:57.732Z',
+                updatedAt: '2021-10-27T09:06:57.732Z',
+                status: 'Completed'
+            }
+
+            const sprintWorkUnit = {
+                id: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+                version: 1,
+                createdAt: '2021-10-27T09:06:57.732Z',
+                updatedAt: '2021-10-27T09:06:57.732Z',
+                work_unit: 'hour'
+            }
+
+            const sprintMetric = {
+                id: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+                version: 1,
+                createdAt: '2021-10-27T09:06:57.732Z',
+                updatedAt: '2021-10-27T09:06:57.732Z',
+                name: 'Work Committed'
+            }
+
+            const team = {
+                id: '46455bf7-ada7-495c-8019-8d7ab76d488e',
+                version: 2,
+                createdAt: '2021-10-27T09:06:57.732Z',
+                updatedAt: '2021-10-27T09:08:19.906Z',
+                name: 'Team A',
+                teamCode: '10012345',
+                projectKey: 'P12343',
+                logo: 'logo_Aa4aa8e7a-85d6-4b75-8f93-6a11dee9b13c.png',
+                isStatusChanged: false,
+                ad_center: {
+                    id: '99055bf7-ada7-495c-8019-8d7ab62d488e',
+                    version: 1,
+                    createdAt: '2021-10-27T09:06:57.732Z',
+                    updatedAt: '2021-10-27T09:06:57.732Z',
+                    name: 'ADCenter Bangalore'
+                },
+                team_status: {
+                    id: 1,
+                    status: 'on_track',
+                    description: 'If everything is all right'
+                }
+            }
+
+            const expectedResponse = [
+                {
+                    "sprint_number": 7,
+                    "status": "11155bf3-ada5-495c-8019-8d7ab76d488e",
+                    "start_date": "2021-05-03T10:20:47.121Z",
+                    "end_date": "2021-05-24T10:20:00.000Z",
+                    "work_unit": "11155bf1-ada5-495c-8019-8d7ab76d488e",
+                    "team": {
+                        "id": "46455bf7-ada7-495c-8019-8d7ab76d488e",
+                        "version": 2,
+                        "createdAt": "2021-10-27T09:06:57.732Z",
+                        "updatedAt": "2021-10-27T09:08:19.906Z",
+                        "name": "Team A",
+                        "teamCode": "10012345",
+                        "projectKey": "P12343",
+                        "logo": "logo_Aa4aa8e7a-85d6-4b75-8f93-6a11dee9b13c.png",
+                        "isStatusChanged": false,
+                        "ad_center": {
+                            "id": "99055bf7-ada7-495c-8019-8d7ab62d488e",
+                            "version": 1,
+                            "createdAt": "2021-10-27T09:06:57.732Z",
+                            "updatedAt": "2021-10-27T09:06:57.732Z",
+                            "name": "ADCenter Bangalore"
+                        },
+                        "team_status": {
+                            "id": 1,
+                            "status": "on_track",
+                            "description": "If everything is all right"
+                        }
+                    },
+                }
+            ]
+
+            jest.spyOn(sprintStatusRepo, 'findOne').mockImplementation(() => sprintStatus);
+            jest.spyOn(sprintWorkUnitRepo, 'findOne').mockImplementation(() => sprintWorkUnit);
+            jest.spyOn(sprintSnapshotmetricRepo, 'findOne').mockImplementation(() => sprintMetric);
+            jest.spyOn(teamRepo, 'findOne').mockImplementation(() => team);
+            const actualResponse = await dataIngestionService.ingestJira(processedJSON, teamId);
+            expect(actualResponse).toEqual(expectedResponse);
+        })
+    })
 })

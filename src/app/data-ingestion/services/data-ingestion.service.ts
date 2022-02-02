@@ -63,8 +63,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === 'workUnit') {
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
-          console.log('workkkk unitttt');
-          console.log(sprintWorkUnit);
           sprint.work_unit = sprintWorkUnit!.id;
         }
         if (actualKey === 'value') {
@@ -72,7 +70,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === 'metric') {
           const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
-
           if (sprintMetricObj !== undefined) {
             sprintMetric = sprintMetricObj;
           }
@@ -143,9 +140,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         if (actualKey === 'bugs') {
           codeQuality.bugs = Number(object.value);
         }
-        // if (actualKey === 'key') {
-        //   codeQuality.id = object.value;
-        // }
         if (actualKey === 'codeSmells') {
           codeQuality.codeSmells = Number(object.value);
         }
@@ -173,8 +167,8 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
   async persistCodeQuality(codeQualityEntity: CodeQualitySnapshot) {
     console.log('check');
-    const codeQualitySnapshotSaved = await this.codeQualitySnapshotRepository.save(codeQualityEntity);
-    return codeQualitySnapshotSaved;
+    return this.codeQualitySnapshotRepository.save(codeQualityEntity);
+
   }
 
   async findTeamUsingTeamId(teamId: string): Promise<string | Team> {

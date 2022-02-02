@@ -2,5 +2,5 @@ projectKey=data-aggregation
 serverUrl=http://localhost:9000
 serverVersion=9.1.0.47736
 dashboardUrl=http://localhost:9000/dashboard?id=data-aggregation
-ceTaskId=AX6u7k5U-vhsjhqzWX1f
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AX6u7k5U-vhsjhqzWX1f
+ceTaskId=AX65sDGa-vhsjhqzWX1j
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AX65sDGa-vhsjhqzWX1j
