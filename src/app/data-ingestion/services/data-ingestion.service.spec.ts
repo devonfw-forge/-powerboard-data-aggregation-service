@@ -305,33 +305,36 @@ describe('DataIngestionService', () => {
     })
 
     describe('ingestJira()', () => {
+
+        //inputs
+        const teamId = '46455bf7-ada7-495c-8019-8d7ab76d488e'
+        const processedJSON: any = [
+            {
+                properties: [
+                    { key: 'maxResults', value: 50 },
+                    { key: 'startAt', value: 0 },
+                    { key: 'isLast', value: true },
+                    { key: 'values_0_id', value: 7 },
+                    {
+                        key: 'values_0_self',
+                        value: 'https://powerboard-capgemini.atlassian.net/rest/agile/1.0/sprint/7'
+                    },
+                    { key: 'values_0_state', value: 'active' },
+                    { key: 'values_0_name', value: 'DUM Sprint 4' },
+                    { key: 'values_0_startDate', value: '2021-05-03T10:20:47.121Z' },
+                    { key: 'values_0_endDate', value: '2021-05-24T10:20:00.000Z' },
+                    { key: 'values_0_originBoardId', value: 3 },
+                    { key: 'values_0_goal', value: '' },
+                    { key: 'values_0_status', value: '' },
+                    { key: 'values_0_workUnit', value: 'hour' },
+                    { key: 'values_0_value', value: 100 },
+                    { key: 'values_0_metric', value: 'Work Committed' }
+                ]
+            }
+        ]
+
         it('should return sprint object', async () => {
-            //inputs
-            const teamId = '46455bf7-ada7-495c-8019-8d7ab76d488e'
-            const processedJSON: any = [
-                {
-                    properties: [
-                        { key: 'maxResults', value: 50 },
-                        { key: 'startAt', value: 0 },
-                        { key: 'isLast', value: true },
-                        { key: 'values_0_id', value: 7 },
-                        {
-                            key: 'values_0_self',
-                            value: 'https://powerboard-capgemini.atlassian.net/rest/agile/1.0/sprint/7'
-                        },
-                        { key: 'values_0_state', value: 'active' },
-                        { key: 'values_0_name', value: 'DUM Sprint 4' },
-                        { key: 'values_0_startDate', value: '2021-05-03T10:20:47.121Z' },
-                        { key: 'values_0_endDate', value: '2021-05-24T10:20:00.000Z' },
-                        { key: 'values_0_originBoardId', value: 3 },
-                        { key: 'values_0_goal', value: '' },
-                        { key: 'values_0_status', value: '' },
-                        { key: 'values_0_workUnit', value: 'hour' },
-                        { key: 'values_0_value', value: 100 },
-                        { key: 'values_0_metric', value: 'Work Committed' }
-                    ]
-                }
-            ]
+
 
             const sprintStatus = {
                 id: '11155bf3-ada5-495c-8019-8d7ab76d488e',
@@ -421,5 +424,17 @@ describe('DataIngestionService', () => {
             const actualResponse = await dataIngestionService.ingestJira(processedJSON, teamId);
             expect(actualResponse).toEqual(expectedResponse);
         })
+
+        // it('should return undefined if the repository does not find the team object', async () => {
+        //     const sprintStatus = {}
+        //     const sprintWorkUnit = {}
+        //     jest.spyOn(sprintStatusRepo, 'findOne').mockImplementation(() => sprintStatus);
+        //     jest.spyOn(sprintWorkUnitRepo, 'findOne').mockImplementation(() => sprintWorkUnit);
+        //     jest.spyOn(sprintSnapshotmetricRepo, 'findOne').mockImplementation(() => sprintMetric);
+        //     jest.spyOn(teamRepo, 'findOne').mockImplementation(() => undefined);
+        //     const response = await dataIngestionService.ingestJira(processedJSON, teamId)
+        //     expect(response).toEqual(undefined)
+
+        // })
     })
 })
