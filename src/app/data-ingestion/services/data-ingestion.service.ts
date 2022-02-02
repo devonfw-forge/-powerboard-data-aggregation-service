@@ -11,7 +11,6 @@ import { SprintMetric } from '../model/entities/sprint_metric.entity';
 import { SprintStatus } from '../model/entities/sprint_status.entity';
 import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
 import { Team } from '../model/entities/team.entity';
-//import { Team } from '../model/entities/team.entity';
 
 import { IDataIngestionService } from './data-ingestion.service.interface';
 
@@ -38,17 +37,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       let sprint: Sprint = {} as Sprint;
       let sprintSnapshotMetricValue: string = '';
       let sprintMetric: SprintMetric = {} as SprintMetric;
-      //let index = 0;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        // index = Number(splittedKeys[splittedKeys.length - 2]);
-        // if (sprintArray.length === index - 1) {
-        //   console.log(index);
-        //   sprintArray[index - 1] = sprint;
-        //   sprint = {} as Sprint
-        // }
         if (actualKey === 'id') {
           sprint.sprint_number = Number(object.value);
         }
@@ -129,12 +121,9 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   }
 
   createSprintSnapshotEntity(sprint: Sprint): SprintSnapshot {
-    //let sprintSnapshotArray: SprintSnapshot[] = [];
-
     let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
     sprintSnapshot.sprint = sprint;
     sprintSnapshot.date_time = sprint.start_date;
-    //sprintSnapshotArray.push(sprintSnapshot);
 
     return sprintSnapshot;
   }
@@ -143,9 +132,8 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     console.log(teamId);
     let codeQualityArray: CodeQualitySnapshot[] = [] as CodeQualitySnapshot[];
     for (let group of processedJson) {
-      console.log('*************');
       console.log(group);
-      //let sprint: Sprint = {} as Sprint;
+
       let codeQuality: CodeQualitySnapshot = {} as CodeQualitySnapshot;
       for (let object of group.properties) {
         let key = object.key;
@@ -154,9 +142,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         if (actualKey === 'bugs') {
           codeQuality.bugs = Number(object.value);
         }
-        // if (actualKey === 'key') {
-        //   codeQuality.id = object.value;
-        // }
         if (actualKey === 'codeSmells') {
           codeQuality.codeSmells = Number(object.value);
         }
@@ -183,9 +168,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   }
 
   async persistCodeQuality(codeQualityEntity: CodeQualitySnapshot) {
-    console.log('check');
-    const codeQualitySnapshotSaved = await this.codeQualitySnapshotRepository.save(codeQualityEntity);
-    return codeQualitySnapshotSaved;
+    return this.codeQualitySnapshotRepository.save(codeQualityEntity);
   }
 
   async findTeamUsingTeamId(teamId: string): Promise<string | Team> {

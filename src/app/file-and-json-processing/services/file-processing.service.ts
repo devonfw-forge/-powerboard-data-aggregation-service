@@ -6,8 +6,6 @@ import { Property } from '../models/property';
 
 @Injectable()
 export class FileProcessingService implements IFileProcessingService {
-  constructor() {}
-
   processXLSXFile(file: any): any {
     const xlsxFile = xlsx.parse(file.buffer);
     return this.mapFileIntoObject(xlsxFile);

@@ -1,15 +1,7 @@
-import { Controller, Get, } from '@nestjs/common';
-
-// import { Response as eResponse } from 'express';
-
-
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('data-ingestion')
 export class DataIngestionController {
-  constructor()
-  //  @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService) 
-  { }
-
   @Get('test')
   getHello(): string {
     console.log('HIIIIIIIIIIIIIII');
@@ -21,5 +13,4 @@ export class DataIngestionController {
   //   return this.dataIngestionService.ingest(obj)
   //   // res.status(200).json(result);
   // }
-
 }
