@@ -14,22 +14,22 @@ export class DataProcessingService implements IDataProcessingService {
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
     const processedJson = this.jsonProcessingService.processJson(obj);
-    return await this.ingestEntities(processedJson, type, teamId);
+    return this.ingestEntities(processedJson, type, teamId);
   }
 
   async processXLSXfile(file: any, teamId: string, type: string): Promise<any> {
     const processedJson = this.fileProcessingService.processXLSXFile(file);
-    return await this.ingestEntities(processedJson, type, teamId);
+    return this.ingestEntities(processedJson, type, teamId);
   }
 
   async ingestEntities(processedData: any, type: string, teamId: string) {
     const componentType: string = type.toLowerCase();
 
     if (componentType == 'jira') {
-      return await this.dataIngestionService.ingestJira(processedData, teamId);
+      return this.dataIngestionService.ingestJira(processedData, teamId);
     }
     if (componentType == 'sonar') {
-      return await this.dataIngestionService.ingestCodeQuality(processedData, teamId);
+      return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
     }
   }
 }
