@@ -61,8 +61,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === 'workUnit') {
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
-          console.log('workkkk unitttt');
-          console.log(sprintWorkUnit);
           sprint.work_unit = sprintWorkUnit!.id;
         }
         if (actualKey === 'value') {
@@ -70,7 +68,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === 'metric') {
           const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
-
           if (sprintMetricObj !== undefined) {
             sprintMetric = sprintMetricObj;
           }
@@ -92,16 +89,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     let sprintSnapshotMetricSaved;
     if (sprintCreated) {
       const sprintSnapshot = this.createSprintSnapshotEntity(sprintCreated);
-
       const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
-
       if (sprintSnapshotSaved) {
         const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
           sprintSnapshotMetricValue,
           sprintSnapshotSaved,
           sprintMetric,
         );
-
         sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
       }
     }
@@ -124,16 +118,12 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
     sprintSnapshot.sprint = sprint;
     sprintSnapshot.date_time = sprint.start_date;
-
     return sprintSnapshot;
   }
 
   async ingestCodeQuality(processedJson: Group[], teamId: string) {
-    console.log(teamId);
     let codeQualityArray: CodeQualitySnapshot[] = [] as CodeQualitySnapshot[];
     for (let group of processedJson) {
-      console.log(group);
-
       let codeQuality: CodeQualitySnapshot = {} as CodeQualitySnapshot;
       for (let object of group.properties) {
         let key = object.key;
@@ -156,11 +146,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
       }
       let team = await this.teamRepository.findOne(teamId);
+
       if (team) {
         codeQuality.team = team;
       }
-      console.log(codeQuality);
+
       const codeQualitySnapshotSaved = await this.persistCodeQuality(codeQuality);
+
       codeQualityArray.push(codeQualitySnapshotSaved);
     }
 

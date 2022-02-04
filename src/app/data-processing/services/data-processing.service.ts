@@ -10,7 +10,7 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IFileProcessingService') private readonly fileProcessingService: IFileProcessingService,
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
-  ) {}
+  ) { }
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
     const processedJson = this.jsonProcessingService.processJson(obj);
