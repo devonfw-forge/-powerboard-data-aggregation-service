@@ -20,8 +20,7 @@ export class AuthController {
   @Post('register')
   async register(@Body() user: User): Promise<User> {
     try {
-      const registered = await this.authService.register(user);
-      return registered;
+      return await this.authService.register(user);
     } catch (e: any) {
       throw new BadRequestException(e.message);
     }

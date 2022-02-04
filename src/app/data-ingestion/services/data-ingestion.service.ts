@@ -11,7 +11,6 @@ import { SprintMetric } from '../model/entities/sprint_metric.entity';
 import { SprintStatus } from '../model/entities/sprint_status.entity';
 import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
 import { Team } from '../model/entities/team.entity';
-//import { Team } from '../model/entities/team.entity';
 
 import { IDataIngestionService } from './data-ingestion.service.interface';
 
@@ -42,7 +41,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-
         if (actualKey === 'id') {
           sprint.sprint_number = Number(object.value);
         }
@@ -129,9 +127,8 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     console.log(teamId);
     let codeQualityArray: CodeQualitySnapshot[] = [] as CodeQualitySnapshot[];
     for (let group of processedJson) {
-      console.log('*************');
       console.log(group);
-      //let sprint: Sprint = {} as Sprint;
+
       let codeQuality: CodeQualitySnapshot = {} as CodeQualitySnapshot;
       for (let object of group.properties) {
         let key = object.key;

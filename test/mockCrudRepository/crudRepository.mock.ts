@@ -1,4 +1,3 @@
-
 export class MockRepository {
   constructor() { }
   public createQueryBuilder = jest.fn(() => this.queryBuilder);
