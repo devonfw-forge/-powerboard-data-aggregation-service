@@ -10,8 +10,8 @@ import { SprintSnapshotMetric } from '../model/entities/sprintSnapshotMetric.ent
 import { SprintMetric } from '../model/entities/sprint_metric.entity';
 import { SprintStatus } from '../model/entities/sprint_status.entity';
 import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
+import { TeamSpirit } from '../model/entities/team-spirit.entity';
 import { Team } from '../model/entities/team.entity';
-
 import { IDataIngestionService } from './data-ingestion.service.interface';
 
 @Injectable()
@@ -27,10 +27,44 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
     @InjectRepository(CodeQualitySnapshot)
     private readonly codeQualitySnapshotRepository: Repository<CodeQualitySnapshot>,
+    @InjectRepository(TeamSpirit)
+    private readonly teamSpiritRepository: Repository<TeamSpirit>,
   ) {
     super(sprintRepository);
   }
 
+  async ingestTeamSpirit(processedJson: Group[], teamId: string) {
+    //let teamSpiritArray: TeamSpirit[]=[];
+    for (let group of processedJson) {
+      let teamSpirit: TeamSpirit = {} as TeamSpirit;
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === 'teamSpiritRating') {
+          teamSpirit.team_spirit_rating = Number(object.value);
+        }
+
+      }
+
+      const activeSprint: any = await this.sprintRepository
+        .createQueryBuilder('sprint')
+        .addSelect('sprint.id')
+        .addSelect('st.status')
+        .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
+        .where('sprint.team_id =:team_Id', { team_Id: teamId })
+        .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
+        .getRawOne() as Sprint;
+
+      teamSpirit.sprint = activeSprint;
+      const savedEntity = await this.persistTeamSpiritEntity(teamSpirit);
+      return savedEntity;
+    }
+  }
+
+  async persistTeamSpiritEntity(teamSpirit: TeamSpirit) {
+    return await this.teamSpiritRepository.save(teamSpirit)
+  }
   async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
     let sprintArray: Sprint[] = [];
     for (let group of processedJson) {
@@ -171,4 +205,6 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       return 'team not found';
     }
   }
+
+
 }

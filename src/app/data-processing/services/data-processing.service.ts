@@ -13,7 +13,12 @@ export class DataProcessingService implements IDataProcessingService {
   ) { }
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
+    console.log(obj);
+
+    console.log(teamId)
     const processedJson = this.jsonProcessingService.processJson(obj);
+    console.log("$$$$$$$$$$$$$$$$$$$$4")
+    console.log(processedJson);
     return this.ingestEntities(processedJson, type, teamId);
   }
 
@@ -30,6 +35,10 @@ export class DataProcessingService implements IDataProcessingService {
     }
     if (componentType == 'sonar') {
       return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
+    }
+    if (componentType == 'teamspirit') {
+
+      return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
     }
   }
 }
