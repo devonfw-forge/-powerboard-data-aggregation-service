@@ -35,6 +35,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
   async ingestTeamSpirit(processedJson: Group[], teamId: string) {
     //let teamSpiritArray: TeamSpirit[]=[];
+    console.log("Processed Jsonnnnnnnnnnnnn");
+    console.log(processedJson);
+    console.log("Team Iddddddddddddd");
+    console.log(teamId);
     for (let group of processedJson) {
       let teamSpirit: TeamSpirit = {} as TeamSpirit;
       for (let object of group.properties) {
@@ -56,8 +60,12 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
         .getRawOne() as Sprint;
 
+      console.log("activeeee spriinntttt")
+      console.log(activeSprint)
       teamSpirit.sprint = activeSprint;
       const savedEntity = await this.persistTeamSpiritEntity(teamSpirit);
+      console.log("SAAAAAAAAAAAAAAAAvveeeddd")
+      console.log(savedEntity)
       return savedEntity;
     }
   }
