@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  ClientStatusRepositoyMock,
   CodeQualitySnapshotRepositoryMock,
   SprintMetricRepositoryMock,
   SprintRepositoryMock,
@@ -8,6 +9,7 @@ import {
   SprintStatusRepositoryMock,
   SprintWorkUnitRepositoryMock,
   TeamRepositoryMock,
+  TeamSpiritRepositoryMock,
 } from '../../../../test/mockCrudRepository/crudRepository.mock';
 import { DataIngestionService } from '../../data-ingestion/services/data-ingestion.service';
 import { FileProcessingService } from '../../file-and-json-processing/services/file-processing.service';
@@ -23,6 +25,8 @@ import { SprintWorkUnit } from '../../data-ingestion/model/entities/sprint_work_
 import { SprintSnapshot } from '../../data-ingestion/model/entities/sprintSnapshot.entity';
 import { SprintStatus } from '../../data-ingestion/model/entities/sprint_status.entity';
 import { CodeQualitySnapshot } from '../../data-ingestion/model/entities/code-quality-snapshot.entity';
+import { TeamSpirit } from '../../data-ingestion/model/entities/team-spirit.entity';
+import { ClientStatus } from '../../data-ingestion/model/entities/client-status.entity';
 describe('DataProcessingService', () => {
   let dataProcessingService: DataProcessingService;
   let dataIngestionService: DataIngestionService;
@@ -37,6 +41,8 @@ describe('DataProcessingService', () => {
   let sprintSnapshotRepo: SprintSnapshotRepositoryMock;
   let sprintStatusRepo: SprintStatusRepositoryMock;
   let codeQualitySnapshotRepo: CodeQualitySnapshotRepositoryMock;
+  let teamSpiritRepo: TeamSpiritRepositoryMock;
+  let clientStatus: ClientStatusRepositoyMock
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -93,6 +99,14 @@ describe('DataProcessingService', () => {
           provide: getRepositoryToken(CodeQualitySnapshot),
           useClass: CodeQualitySnapshotRepositoryMock,
         },
+        {
+          provide: getRepositoryToken(TeamSpirit),
+          useClass: TeamSpiritRepositoryMock,
+        },
+        {
+          provide: getRepositoryToken(ClientStatus),
+          useClass: ClientStatusRepositoyMock,
+        },
       ],
     }).compile();
 
@@ -109,6 +123,8 @@ describe('DataProcessingService', () => {
     sprintStatusRepo = module.get<SprintStatusRepositoryMock>(getRepositoryToken(SprintStatus));
     sprintSnapshotRepo = module.get<SprintSnapshotRepositoryMock>(getRepositoryToken(SprintSnapshot));
     codeQualitySnapshotRepo = module.get<CodeQualitySnapshotRepositoryMock>(getRepositoryToken(CodeQualitySnapshot));
+    teamSpiritRepo = module.get<TeamSpiritRepositoryMock>(getRepositoryToken(TeamSpirit));
+    clientStatus = module.get<ClientStatusRepositoyMock>(getRepositoryToken(ClientStatus));
   });
 
   it('should be defined after module initialization', () => {
@@ -124,6 +140,8 @@ describe('DataProcessingService', () => {
     expect(sprintSnapshotRepo).toBeDefined();
     expect(sprintStatusRepo).toBeDefined();
     expect(codeQualitySnapshotRepo).toBeDefined();
+    expect(teamSpiritRepo).toBeDefined();
+    expect(clientStatus).toBeDefined();
   });
 
   it('should process data', async () => {

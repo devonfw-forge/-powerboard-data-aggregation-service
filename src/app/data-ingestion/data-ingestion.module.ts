@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JsonProcessingService } from '../file-and-json-processing/services/json-processing.service';
 import { DataIngestionController } from './controllers/dataIngestion.controller';
+import { ClientStatus } from './model/entities/client-status.entity';
 import { CodeQualitySnapshot } from './model/entities/code-quality-snapshot.entity';
 import { Sprint } from './model/entities/sprint.entity';
 import { SprintSnapshot } from './model/entities/sprintSnapshot.entity';
@@ -24,7 +25,8 @@ import { DataIngestionService } from './services/data-ingestion.service';
       SprintSnapshot,
       SprintSnapshotMetric,
       CodeQualitySnapshot,
-      TeamSpirit
+      TeamSpirit,
+      ClientStatus
     ]),
   ],
   providers: [
