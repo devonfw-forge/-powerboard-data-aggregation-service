@@ -13,7 +13,7 @@ import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
 import { TeamSpirit } from '../model/entities/team-spirit.entity';
 import { Team } from '../model/entities/team.entity';
 import { IDataIngestionService } from './data-ingestion.service.interface';
-
+import * as defaults from '../../shared/constants/constants'
 @Injectable()
 export class DataIngestionService extends TypeOrmCrudService<Sprint> implements IDataIngestionService {
   constructor(
@@ -45,7 +45,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'teamSpiritRating') {
+        if (actualKey === defaults.teamSpiritRating) {
           teamSpirit.team_spirit_rating = Number(object.value);
         }
 
@@ -83,13 +83,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'id') {
+        if (actualKey === defaults.id) {
           sprint.sprint_number = Number(object.value);
         }
-        if (actualKey === 'startDate') {
+        if (actualKey === defaults.startDate) {
           sprint.start_date = object.value;
         }
-        if (actualKey === 'state') {
+        if (actualKey === defaults.state) {
           if (object.value === 'active') {
             object.value = 'Completed';
           } else {
@@ -98,17 +98,17 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           const sprintStatus = await this.sprintStatusRepository.findOne({ where: { status: object.value } });
           sprint.status = sprintStatus!.id;
         }
-        if (actualKey === 'endDate') {
+        if (actualKey === defaults.endDate) {
           sprint.end_date = object.value;
         }
-        if (actualKey === 'workUnit') {
+        if (actualKey === defaults.workUnit) {
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
           sprint.work_unit = sprintWorkUnit!.id;
         }
-        if (actualKey === 'value') {
+        if (actualKey === defaults.value) {
           sprintSnapshotMetricValue = object.value;
         }
-        if (actualKey === 'metric') {
+        if (actualKey === defaults.metric) {
           const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
           if (sprintMetricObj !== undefined) {
             sprintMetric = sprintMetricObj;
@@ -171,19 +171,19 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'bugs') {
+        if (actualKey === defaults.bugs) {
           codeQuality.bugs = Number(object.value);
         }
-        if (actualKey === 'codeSmells') {
+        if (actualKey === defaults.codeSmells) {
           codeQuality.codeSmells = Number(object.value);
         }
-        if (actualKey === 'codeCoverage') {
+        if (actualKey === defaults.codeCoverage) {
           codeQuality.code_coverage = Number(object.value);
         }
-        if (actualKey === 'qualityGateStatus') {
+        if (actualKey === defaults.qualityGateStatus) {
           codeQuality.status = object.value;
         }
-        if (actualKey === 'analysisDate') {
+        if (actualKey === defaults.analysisDate) {
           codeQuality.snapshot_time = object.value;
         }
       }

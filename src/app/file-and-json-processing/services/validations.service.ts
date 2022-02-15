@@ -3,6 +3,15 @@ import { IValidationService } from './validations.service.interface';
 
 export class ValidationService implements IValidationService {
   validateJira(data: Group[]): Boolean {
+    if (this.isNotNull(data)) {
+      return true;
+    }
+    if (this.isNumber(data)) {
+      return true;
+    }
+    if (this.isString(data)) {
+      return true;
+    }
     return true;
   }
 
