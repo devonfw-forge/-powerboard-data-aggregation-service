@@ -11,7 +11,7 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IFileProcessingService') private readonly fileProcessingService: IFileProcessingService,
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
-    @Inject('IValidateService') private readonly validationService: IValidationService,
+    @Inject('IValidationService') private readonly validationService: IValidationService,
   ) {}
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {

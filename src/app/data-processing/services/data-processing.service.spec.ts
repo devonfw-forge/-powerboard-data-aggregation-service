@@ -23,11 +23,13 @@ import { SprintWorkUnit } from '../../data-ingestion/model/entities/sprint_work_
 import { SprintSnapshot } from '../../data-ingestion/model/entities/sprintSnapshot.entity';
 import { SprintStatus } from '../../data-ingestion/model/entities/sprint_status.entity';
 import { CodeQualitySnapshot } from '../../data-ingestion/model/entities/code-quality-snapshot.entity';
+import { ValidationService } from '../../file-and-json-processing/services/validations.service';
 describe('DataProcessingService', () => {
   let dataProcessingService: DataProcessingService;
   let dataIngestionService: DataIngestionService;
   let fileProcessingService: FileProcessingService;
   let jsonProcessingService: JsonProcessingService;
+  let validationService: ValidationService;
   //repos
   let sprintRepo: SprintRepositoryMock;
   let teamRepo: TeamRepositoryMock;
@@ -45,9 +47,14 @@ describe('DataProcessingService', () => {
         DataIngestionService,
         FileProcessingService,
         JsonProcessingService,
+        ValidationService,
         {
           provide: 'IDataProcessingService',
           useClass: DataProcessingService,
+        },
+        {
+          provide: 'IValidationService',
+          useClass: ValidationService,
         },
         {
           provide: 'IDataIngestionService',
@@ -100,6 +107,7 @@ describe('DataProcessingService', () => {
     dataIngestionService = module.get<DataIngestionService>('IDataIngestionService');
     fileProcessingService = module.get<FileProcessingService>('IFileProcessingService');
     jsonProcessingService = module.get<JsonProcessingService>('IJsonProcessingService');
+    validationService = module.get<ValidationService>('IValidationService');
     //repo get
     sprintRepo = module.get<SprintRepositoryMock>(getRepositoryToken(Sprint));
     teamRepo = module.get<TeamRepositoryMock>(getRepositoryToken(Team));
@@ -116,6 +124,7 @@ describe('DataProcessingService', () => {
     expect(dataIngestionService).toBeDefined();
     expect(fileProcessingService).toBeDefined();
     expect(jsonProcessingService).toBeDefined();
+    expect(validationService).toBeDefined();
     expect(sprintRepo).toBeDefined();
     expect(teamRepo).toBeDefined();
     expect(sprintMetric).toBeDefined();
