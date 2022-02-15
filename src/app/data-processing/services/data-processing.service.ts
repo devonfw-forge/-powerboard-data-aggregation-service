@@ -12,15 +12,12 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
     @Inject('IValidateService') private readonly validationService: IValidationService,
-  ) {}
+  ) { }
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
-    console.log(obj);
 
-    console.log(teamId);
     const processedJson = this.jsonProcessingService.processJson(obj);
-    console.log('$$$$$$$$$$$$$$$$$$$$4');
-    console.log(processedJson);
+
     return this.ingestEntities(processedJson, type, teamId);
   }
 
@@ -44,6 +41,10 @@ export class DataProcessingService implements IDataProcessingService {
     }
     if (componentType == 'teamspirit') {
       return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
+    }
+    if (componentType == 'clientstatus') {
+
+      return this.dataIngestionService.ingestClientStatus(processedData, teamId);
     }
   }
 }

@@ -89,6 +89,7 @@
       "<rootDir>/migration/",
       "<rootDir>/config/",
       "<rootDir>/app/visibility",
+      "<rootDir>/app/core",
       "entities",
       ".module.ts",
       ".main.ts",

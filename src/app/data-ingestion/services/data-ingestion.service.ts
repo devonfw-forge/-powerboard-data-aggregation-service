@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Group } from '../../file-and-json-processing/models/group';
+import { ClientStatus } from '../model/entities/client-status.entity';
 import { CodeQualitySnapshot } from '../model/entities/code-quality-snapshot.entity';
 import { Sprint } from '../model/entities/sprint.entity';
 import { SprintSnapshot } from '../model/entities/sprintSnapshot.entity';
@@ -29,16 +30,14 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     private readonly codeQualitySnapshotRepository: Repository<CodeQualitySnapshot>,
     @InjectRepository(TeamSpirit)
     private readonly teamSpiritRepository: Repository<TeamSpirit>,
+    @InjectRepository(ClientStatus)
+    private readonly clientStatusRepository: Repository<ClientStatus>,
   ) {
     super(sprintRepository);
   }
 
   async ingestTeamSpirit(processedJson: Group[], teamId: string) {
-    //let teamSpiritArray: TeamSpirit[]=[];
-    console.log("Processed Jsonnnnnnnnnnnnn");
-    console.log(processedJson);
-    console.log("Team Iddddddddddddd");
-    console.log(teamId);
+
     for (let group of processedJson) {
       let teamSpirit: TeamSpirit = {} as TeamSpirit;
       for (let object of group.properties) {
@@ -59,13 +58,9 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         .where('sprint.team_id =:team_Id', { team_Id: teamId })
         .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
         .getRawOne() as Sprint;
-
-      console.log("activeeee spriinntttt")
-      console.log(activeSprint)
       teamSpirit.sprint = activeSprint;
       const savedEntity = await this.persistTeamSpiritEntity(teamSpirit);
-      console.log("SAAAAAAAAAAAAAAAAvveeeddd")
-      console.log(savedEntity)
+
       return savedEntity;
     }
   }
@@ -73,6 +68,38 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   async persistTeamSpiritEntity(teamSpirit: TeamSpirit) {
     return await this.teamSpiritRepository.save(teamSpirit)
   }
+
+  async ingestClientStatus(processedJson: Group[], teamId: string) {
+    for (let group of processedJson) {
+      let clientSatus: ClientStatus = {} as ClientStatus;
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === defaults.clientRating) {
+          clientSatus.client_rating = Number(object.value);
+        }
+
+      }
+      const activeSprint: any = await this.sprintRepository
+        .createQueryBuilder('sprint')
+        .addSelect('sprint.id')
+        .addSelect('st.status')
+        .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
+        .where('sprint.team_id =:team_Id', { team_Id: teamId })
+        .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
+        .getRawOne() as Sprint;
+
+      clientSatus.sprint = activeSprint;
+      const savedEntity = await this.persistClientStatusEntity(clientSatus);
+
+      return savedEntity;
+    }
+  }
+  async persistClientStatusEntity(clientStatus: ClientStatus) {
+    return await this.clientStatusRepository.save(clientStatus)
+  }
+
   async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
     let sprintArray: Sprint[] = [];
     for (let group of processedJson) {
