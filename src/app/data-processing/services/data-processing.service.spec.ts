@@ -245,4 +245,20 @@ describe('DataProcessingService', () => {
     const result = await dataProcessingService.ingestEntities(processedData, 'sonar', 'mockTeamId');
     expect(result).toEqual(sonarData);
   });
+
+  it('should ingest team spirit entities ', async () => {
+    let teamSpiritData: any = 'MockTeamSpiritProcessedData';
+    let processedData: any = 'MockProcessedTeamSpiritData';
+    jest.spyOn(dataIngestionService, 'ingestTeamSpirit').mockResolvedValue(teamSpiritData);
+    const result = await dataProcessingService.ingestEntities(processedData, 'teamspirit', 'mockTeamId');
+    expect(result).toEqual(teamSpiritData);
+  });
+
+  it('should ingest client status entities ', async () => {
+    let clientStatusData: any = 'MockClientStatusProcessedData';
+    let processedData: any = 'MockProcessedClientStatusData';
+    jest.spyOn(dataIngestionService, 'ingestClientStatus').mockResolvedValue(clientStatusData);
+    const result = await dataProcessingService.ingestEntities(processedData, 'clientstatus', 'mockTeamId');
+    expect(result).toEqual(clientStatusData);
+  });
 });
