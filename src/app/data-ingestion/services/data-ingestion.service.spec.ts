@@ -21,13 +21,16 @@ import {
   SprintWorkUnitRepositoryMock,
   SprintSnapshotRepositoryMock,
   SprintStatusRepositoryMock,
-  CodeQualitySnapshotRepositoryMock, TeamSpiritRepositoryMock
+  CodeQualitySnapshotRepositoryMock,
+  TeamSpiritRepositoryMock,
+  ClientStatusRepositoyMock,
 } from '../../../../test/mockCrudRepository/crudRepository.mock';
 import { DataProcessingService } from '../../data-processing/services/data-processing.service';
 // import { ADCenter } from '../model/entities/ad-center.entity';
 // import { TeamStatus } from '../model/entities/team_status.entity';
 import { CodeQualitySnapshot } from '../model/entities/code-quality-snapshot.entity';
 import { TeamSpirit } from '../model/entities/team-spirit.entity';
+import { ClientStatus } from '../model/entities/client-status.entity';
 
 describe('DataIngestionService', () => {
   let dataIngestionService: DataIngestionService;
@@ -41,7 +44,7 @@ describe('DataIngestionService', () => {
   let sprintStatusRepo: SprintStatusRepositoryMock;
   let codeQualitySnapshotRepo: CodeQualitySnapshotRepositoryMock;
   let teamSpiritRepo: TeamSpiritRepositoryMock;
-
+  let clientStatusRepo: ClientStatusRepositoyMock;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -101,6 +104,10 @@ describe('DataIngestionService', () => {
           provide: getRepositoryToken(TeamSpirit),
           useClass: TeamSpiritRepositoryMock,
         },
+        {
+          provide: getRepositoryToken(ClientStatus),
+          useClass: ClientStatusRepositoyMock,
+        },
       ],
     }).compile();
 
@@ -116,6 +123,7 @@ describe('DataIngestionService', () => {
     sprintSnapshotRepo = module.get<SprintSnapshotRepositoryMock>(getRepositoryToken(SprintSnapshot));
     codeQualitySnapshotRepo = module.get<CodeQualitySnapshotRepositoryMock>(getRepositoryToken(CodeQualitySnapshot));
     teamSpiritRepo = module.get<TeamSpiritRepositoryMock>(getRepositoryToken(TeamSpirit));
+    clientStatusRepo = module.get<ClientStatusRepositoyMock>(getRepositoryToken(ClientStatus));
   });
 
   it('should be defined after module initialization', () => {
@@ -129,6 +137,7 @@ describe('DataIngestionService', () => {
     expect(sprintStatusRepo).toBeDefined();
     expect(codeQualitySnapshotRepo).toBeDefined();
     expect(teamSpiritRepo).toBeDefined();
+    expect(clientStatusRepo).toBeDefined();
   });
   describe('persistEntities()', () => {
     const sprint: any = {
@@ -665,7 +674,6 @@ describe('DataIngestionService', () => {
   });
 
   describe('ingestTeamSpirit()', () => {
-
     it('it should persist and return the team spirit entity', async () => {
       //inputs
       const teamId = '46455bf7-ada7-495c-8019-8d7ab76d488e';
@@ -673,7 +681,7 @@ describe('DataIngestionService', () => {
         {
           properties: [
             { key: 'teamSpiritRating', value: '10' },
-            { key: 'name', value: 'test' }
+            { key: 'name', value: 'test' },
           ],
         },
       ];
@@ -689,8 +697,8 @@ describe('DataIngestionService', () => {
         sprint_team_id: '46455bf7-ada7-495c-8019-8d7ab76d491e',
         sprint_work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
         st_status: 'In Progress',
-        id: '20955bf8-ada5-495c-8019-8d7ab76d488e'
-      }
+        id: '20955bf8-ada5-495c-8019-8d7ab76d488e',
+      };
 
       const savedEntity: any = {
         team_spirit_rating: 10,
@@ -706,36 +714,106 @@ describe('DataIngestionService', () => {
           sprint_team_id: '46455bf7-ada7-495c-8019-8d7ab76d491e',
           sprint_work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
           st_status: 'In Progress',
-          id: '20955bf8-ada5-495c-8019-8d7ab76d488e'
+          id: '20955bf8-ada5-495c-8019-8d7ab76d488e',
         },
         id: 'e58b540b-c0f2-4309-b75e-81c7a67760d6',
         version: 1,
         createdAt: '2022-02-14T04:48:04.663Z',
-        updatedAt: '2022-02-14T04:48:04.663Z'
-      }
+        updatedAt: '2022-02-14T04:48:04.663Z',
+      };
 
-
-      const createQueryBuilder1: any = {
-        where: () => createQueryBuilder1,
-        addSelect: () => createQueryBuilder1,
-        innerJoin: () => createQueryBuilder1,
-        andWhere: () => createQueryBuilder1,
+      const createQueryBuilder: any = {
+        where: () => createQueryBuilder,
+        addSelect: () => createQueryBuilder,
+        innerJoin: () => createQueryBuilder,
+        andWhere: () => createQueryBuilder,
         getRawOne: jest.fn().mockResolvedValue(activeSprint),
       };
 
-      jest.spyOn(sprintRepo, 'createQueryBuilder').mockImplementation(() => createQueryBuilder1);
+      jest.spyOn(sprintRepo, 'createQueryBuilder').mockImplementation(() => createQueryBuilder);
       jest.spyOn(dataIngestionService, 'persistTeamSpiritEntity').mockImplementation(() => savedEntity);
       const actualResponse = await dataIngestionService.ingestTeamSpirit(processedJSON, teamId);
       expect(actualResponse).toEqual(savedEntity);
-    })
+    });
   });
 
   describe('persistTeamSpiritEntity()', () => {
     it('it should call save method of repository and persist the entity', async () => {
-
-      const teamSpirit: any = {}
+      const teamSpirit: any = {};
       await dataIngestionService.persistTeamSpiritEntity(teamSpirit);
       expect(teamSpiritRepo.save).toHaveBeenCalled();
-    })
-  })
-})
+    });
+  });
+
+  describe('ingestClientStatus()', () => {
+    it('should persist and return the client status entity', async () => {
+      //inputs
+      const teamId = '46455bf7-ada7-495c-8019-8d7ab76d488e';
+      const processedJSON: any = [
+        {
+          properties: [
+            { key: 'clientRating', value: '12' },
+            { key: 'name', value: 'test' },
+          ],
+        },
+      ];
+      const activeSprint = {
+        sprint_id: '20955bf8-ada5-495c-8019-8d7ab76d488e',
+        sprint_version: 1,
+        sprint_createdAt: '2021-10-27T09:06:57.732Z',
+        sprint_updatedAt: '2021-10-27T09:06:57.732Z',
+        sprint_sprint_number: 22,
+        sprint_start_date: '2021-10-21T10:00:15.000Z',
+        sprint_end_date: '2021-11-18T10:00:15.000Z',
+        sprint_status: '11155bf2-ada5-495c-8019-8d7ab76d488e',
+        sprint_team_id: '46455bf7-ada7-495c-8019-8d7ab76d491e',
+        sprint_work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+        st_status: 'In Progress',
+        id: '20955bf8-ada5-495c-8019-8d7ab76d488e',
+      };
+
+      const savedEntity: any = {
+        client_rating: 10,
+        sprint: {
+          sprint_id: '20955bf8-ada5-495c-8019-8d7ab76d488e',
+          sprint_version: 1,
+          sprint_createdAt: '2021-10-27T09:06:57.732Z',
+          sprint_updatedAt: '2021-10-27T09:06:57.732Z',
+          sprint_sprint_number: 22,
+          sprint_start_date: '2021-10-21T10:00:15.000Z',
+          sprint_end_date: '2021-11-18T10:00:15.000Z',
+          sprint_status: '11155bf2-ada5-495c-8019-8d7ab76d488e',
+          sprint_team_id: '46455bf7-ada7-495c-8019-8d7ab76d491e',
+          sprint_work_unit: '11155bf1-ada5-495c-8019-8d7ab76d488e',
+          st_status: 'In Progress',
+          id: '20955bf8-ada5-495c-8019-8d7ab76d488e',
+        },
+        id: 'e58b540b-c0f2-4309-b75e-81c7a67760d6',
+        version: 1,
+        createdAt: '2022-02-14T04:48:04.663Z',
+        updatedAt: '2022-02-14T04:48:04.663Z',
+      };
+
+      const createQueryBuilder: any = {
+        where: () => createQueryBuilder,
+        addSelect: () => createQueryBuilder,
+        innerJoin: () => createQueryBuilder,
+        andWhere: () => createQueryBuilder,
+        getRawOne: jest.fn().mockResolvedValue(activeSprint),
+      };
+
+      jest.spyOn(sprintRepo, 'createQueryBuilder').mockImplementation(() => createQueryBuilder);
+      jest.spyOn(dataIngestionService, 'persistClientStatusEntity').mockImplementation(() => savedEntity);
+      const actualResponse = await dataIngestionService.ingestClientStatus(processedJSON, teamId);
+      expect(actualResponse).toEqual(savedEntity);
+    });
+  });
+
+  describe('persistClientStatusEntity()', () => {
+    it('it should call save method of repository and persist the entity', async () => {
+      const clientStatus: any = {};
+      await dataIngestionService.persistClientStatusEntity(clientStatus);
+      expect(clientStatusRepo.save).toHaveBeenCalled();
+    });
+  });
+});

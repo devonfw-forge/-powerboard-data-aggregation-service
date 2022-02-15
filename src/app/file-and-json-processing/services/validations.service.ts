@@ -1,6 +1,7 @@
 //import { CodeQualitySnapshot } from '../../data-ingestion/model/entities/code-quality-snapshot.entity';
 import { Group } from '../models/group';
 import { IValidationService } from './validations.service.interface';
+import * as defaults from '../../shared/constants/constants';
 
 export class ValidationService implements IValidationService {
   validateJira(data: Group[]): Boolean {
@@ -14,27 +15,27 @@ export class ValidationService implements IValidationService {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'bugs') {
+        if (actualKey === defaults.bugs) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === 'codeSmells') {
+        if (actualKey === defaults.codeSmells) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === 'codeCoverage') {
+        if (actualKey === defaults.codeCoverage) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === 'qualityGateStatus') {
+        if (actualKey === defaults.qualityGateStatus) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === 'analysisDate') {
+        if (actualKey === defaults.analysisDate) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
