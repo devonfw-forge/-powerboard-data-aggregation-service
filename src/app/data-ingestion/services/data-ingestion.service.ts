@@ -64,18 +64,18 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   }
 
   async persistTeamSpiritEntity(teamSpirit: TeamSpirit) {
-    return await this.teamSpiritRepository.save(teamSpirit);
+    return this.teamSpiritRepository.save(teamSpirit);
   }
 
   async ingestClientStatus(processedJson: Group[], teamId: string) {
     for (let group of processedJson) {
-      let clientSatus: ClientStatus = {} as ClientStatus;
+      let clientStatus: ClientStatus = {} as ClientStatus;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === defaults.clientRating) {
-          clientSatus.client_rating = Number(object.value);
+        if (actualKey === defaults.client_rating) {
+          clientStatus.client_rating = Number(object.value);
         }
       }
       const activeSprint: any = (await this.sprintRepository
@@ -87,14 +87,14 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
         .getRawOne()) as Sprint;
 
-      clientSatus.sprint = activeSprint;
-      const savedEntity = await this.persistClientStatusEntity(clientSatus);
+      clientStatus.sprint = activeSprint;
+      const savedEntity = await this.persistClientStatusEntity(clientStatus);
 
       return savedEntity;
     }
   }
   async persistClientStatusEntity(clientStatus: ClientStatus) {
-    return await this.clientStatusRepository.save(clientStatus);
+    return this.clientStatusRepository.save(clientStatus);
   }
 
   async ingestJira(processedJson: Group[], teamId: string): Promise<any> {

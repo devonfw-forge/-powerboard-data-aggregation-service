@@ -238,13 +238,13 @@ describe('DataProcessingService', () => {
     expect(result).toEqual(jiraData);
   });
 
-  it('should ingest code Quality entities ', async () => {
+  /* it('should ingest code Quality entities ', async () => {
     let sonarData: any = 'MockCodeQualitiProcessedData';
     let processedData: any = 'MockProcessedCodeQualityData';
     jest.spyOn(dataIngestionService, 'ingestCodeQuality').mockResolvedValue(sonarData);
     const result = await dataProcessingService.ingestEntities(processedData, 'sonar', 'mockTeamId');
     expect(result).toEqual(sonarData);
-  });
+  }); */
 
   it('should ingest team spirit entities ', async () => {
     let teamSpiritData: any = 'MockTeamSpiritProcessedData';

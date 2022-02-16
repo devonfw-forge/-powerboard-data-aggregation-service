@@ -16,7 +16,6 @@ export class DataProcessingService implements IDataProcessingService {
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
     const processedJson = this.jsonProcessingService.processJson(obj);
-
     return this.ingestEntities(processedJson, type, teamId);
   }
 

@@ -31,9 +31,12 @@ import { DataProcessingService } from '../../data-processing/services/data-proce
 import { CodeQualitySnapshot } from '../model/entities/code-quality-snapshot.entity';
 import { TeamSpirit } from '../model/entities/team-spirit.entity';
 import { ClientStatus } from '../model/entities/client-status.entity';
+import { ValidationService } from '../../file-and-json-processing/services/validations.service';
 
 describe('DataIngestionService', () => {
   let dataIngestionService: DataIngestionService;
+  let validationService: ValidationService;
+
   //repos
   let sprintRepo: SprintRepositoryMock;
   let teamRepo: TeamRepositoryMock;
@@ -52,9 +55,14 @@ describe('DataIngestionService', () => {
         DataIngestionService,
         FileProcessingService,
         JsonProcessingService,
+        ValidationService,
         {
           provide: 'IDataProcessingService',
           useClass: DataProcessingService,
+        },
+        {
+          provide: 'IValidationService',
+          useClass: ValidationService,
         },
         {
           provide: 'IDataIngestionService',
@@ -112,6 +120,7 @@ describe('DataIngestionService', () => {
     }).compile();
 
     dataIngestionService = module.get<DataIngestionService>('IDataIngestionService');
+    validationService = module.get<ValidationService>('IValidationService');
 
     //repo get
     sprintRepo = module.get<SprintRepositoryMock>(getRepositoryToken(Sprint));
@@ -128,6 +137,7 @@ describe('DataIngestionService', () => {
 
   it('should be defined after module initialization', () => {
     expect(dataIngestionService).toBeDefined();
+    expect(validationService).toBeDefined();
     expect(sprintRepo).toBeDefined();
     expect(teamRepo).toBeDefined();
     expect(sprintMetric).toBeDefined();

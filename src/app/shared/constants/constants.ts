@@ -11,4 +11,4 @@ export const workUnit = 'workUnit';
 export const value = 'value ';
 export const metric = 'metric';
 export const teamSpiritRating = 'teamSpiritRating';
-export const clientRating = 'clientRating';
+export const client_rating = 'clientRating';
