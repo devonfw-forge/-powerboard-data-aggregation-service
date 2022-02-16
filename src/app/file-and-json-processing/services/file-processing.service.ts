@@ -11,7 +11,7 @@ export class FileProcessingService implements IFileProcessingService {
     return this.mapFileIntoObject(xlsxFile);
   }
 
-  private mapFileIntoObject(file: any): Group[] {
+  public mapFileIntoObject(file: any): Group[] {
     let result: Group[] = [];
     const l1: any = file[0].data;
     for (let i = 1; i < l1.length; i++) {

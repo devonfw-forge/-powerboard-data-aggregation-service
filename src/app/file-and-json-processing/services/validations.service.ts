@@ -1,11 +1,51 @@
-//import { CodeQualitySnapshot } from '../../data-ingestion/model/entities/code-quality-snapshot.entity';
 import { Group } from '../models/group';
 import { IValidationService } from './validations.service.interface';
 import * as defaults from '../../shared/constants/constants';
 
 export class ValidationService implements IValidationService {
   validateJira(data: Group[]): Boolean {
-    console.log(data);
+    for (let group of data) {
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === defaults.id) {
+          this.isNotNull(object.value);
+          let result = this.isNumber(object.value);
+          this.checkError(result);
+        }
+        if (actualKey === defaults.startDate) {
+          this.isNotNull(object.value);
+          let result = this.isString(object.value);
+          this.checkError(result);
+        }
+        if (actualKey === defaults.state) {
+          this.isNotNull(object.value);
+          let result = this.isString(object.value);
+          this.checkError(result);
+        }
+        if (actualKey === defaults.endDate) {
+          this.isNotNull(object.value);
+          let result = this.isString(object.value);
+          this.checkError(result);
+        }
+        if (actualKey === defaults.workUnit) {
+          this.isNotNull(object.value);
+          let result = this.isString(object.value);
+          this.checkError(result);
+        }
+        if (actualKey === defaults.value) {
+          this.isNotNull(object.value);
+          let result = this.isString(object.value);
+          this.checkError(result);
+        }
+        if (actualKey === defaults.metric) {
+          this.isNotNull(object.value);
+          let result = this.isString(object.value);
+          this.checkError(result);
+        }
+      }
+    }
     return true;
   }
 
