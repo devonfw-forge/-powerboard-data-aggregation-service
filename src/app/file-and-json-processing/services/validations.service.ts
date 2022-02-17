@@ -49,6 +49,22 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
+  validateClientStisfaction(data: Group[]): Boolean {
+    for (let group of data) {
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === defaults.client_rating) {
+          this.isNotNull(object.value);
+          let result = this.isNumber(object.value);
+          this.checkError(result);
+        }
+      }
+    }
+    return true;
+  }
+
   validateSonar(data: Group[]): Boolean {
     for (let group of data) {
       for (let object of group.properties) {
