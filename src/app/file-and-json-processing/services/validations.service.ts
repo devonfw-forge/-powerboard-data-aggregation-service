@@ -9,12 +9,12 @@ export class ValidationService implements IValidationService {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === defaults.id) {
+        if (actualKey === defaults.sprint_number) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.startDate) {
+        if (actualKey === defaults.start_date) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
@@ -24,12 +24,12 @@ export class ValidationService implements IValidationService {
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.endDate) {
+        if (actualKey === defaults.end_date) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.workUnit) {
+        if (actualKey === defaults.work_unit) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
@@ -76,22 +76,22 @@ export class ValidationService implements IValidationService {
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.codeSmells) {
+        if (actualKey === defaults.code_smell) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.codeCoverage) {
+        if (actualKey === defaults.code_coverage) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.qualityGateStatus) {
+        if (actualKey === defaults.status) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.analysisDate) {
+        if (actualKey === defaults.snapshot_time) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
