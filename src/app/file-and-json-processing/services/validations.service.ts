@@ -3,7 +3,7 @@ import { IValidationService } from './validations.service.interface';
 import * as defaults from '../../shared/constants/constants';
 
 export class ValidationService implements IValidationService {
-  validateJira(data: Group[]): Boolean {
+  validateJira(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
@@ -49,7 +49,7 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
-  validateClientStisfaction(data: Group[]): Boolean {
+  validateClientStisfaction(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
@@ -65,7 +65,7 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
-  validateSonar(data: Group[]): Boolean {
+  validateSonar(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
@@ -107,21 +107,21 @@ export class ValidationService implements IValidationService {
     }
   }
 
-  private isString(value: any): Boolean {
+  private isString(value: any): boolean {
     if (typeof value === 'string') {
       return true;
     }
     return false;
   }
 
-  private isNumber(value: any): Boolean {
+  private isNumber(value: any): boolean {
     if (typeof value === 'number') {
       return true;
     }
     return false;
   }
 
-  private checkError(value: Boolean): any {
+  private checkError(value: boolean): any {
     if (!value) {
       throw new Error('Exception Occured');
     }
