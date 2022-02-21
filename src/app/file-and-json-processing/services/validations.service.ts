@@ -3,18 +3,18 @@ import { IValidationService } from './validations.service.interface';
 import * as defaults from '../../shared/constants/constants';
 
 export class ValidationService implements IValidationService {
-  validateJira(data: Group[]): Boolean {
+  validateJira(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === defaults.id) {
+        if (actualKey === defaults.sprint_number) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.startDate) {
+        if (actualKey === defaults.start_date) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
@@ -24,12 +24,12 @@ export class ValidationService implements IValidationService {
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.endDate) {
+        if (actualKey === defaults.end_date) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.workUnit) {
+        if (actualKey === defaults.work_unit) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
@@ -49,7 +49,23 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
-  validateSonar(data: Group[]): Boolean {
+  validateClientStisfaction(data: Group[]): boolean {
+    for (let group of data) {
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === defaults.client_rating) {
+          this.isNotNull(object.value);
+          let result = this.isNumber(object.value);
+          this.checkError(result);
+        }
+      }
+    }
+    return true;
+  }
+
+  validateSonar(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
@@ -60,22 +76,22 @@ export class ValidationService implements IValidationService {
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.codeSmells) {
+        if (actualKey === defaults.code_smell) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.codeCoverage) {
+        if (actualKey === defaults.code_coverage) {
           this.isNotNull(object.value);
           let result = this.isNumber(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.qualityGateStatus) {
+        if (actualKey === defaults.status) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
         }
-        if (actualKey === defaults.analysisDate) {
+        if (actualKey === defaults.snapshot_time) {
           this.isNotNull(object.value);
           let result = this.isString(object.value);
           this.checkError(result);
@@ -91,21 +107,21 @@ export class ValidationService implements IValidationService {
     }
   }
 
-  private isString(value: any): Boolean {
+  private isString(value: any): boolean {
     if (typeof value === 'string') {
       return true;
     }
     return false;
   }
 
-  private isNumber(value: any): Boolean {
+  private isNumber(value: any): boolean {
     if (typeof value === 'number') {
       return true;
     }
     return false;
   }
 
-  private checkError(value: Boolean): any {
+  private checkError(value: boolean): any {
     if (!value) {
       throw new Error('Exception Occured');
     }

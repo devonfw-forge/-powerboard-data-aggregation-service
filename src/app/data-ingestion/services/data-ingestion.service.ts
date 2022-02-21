@@ -43,7 +43,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === defaults.teamSpiritRating) {
+        if (actualKey === defaults.team_spirit_rating) {
           teamSpirit.team_spirit_rating = Number(object.value);
         }
       }
@@ -107,10 +107,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === defaults.id) {
+        if (actualKey === defaults.sprint_number) {
           sprint.sprint_number = Number(object.value);
         }
-        if (actualKey === defaults.startDate) {
+        if (actualKey === defaults.start_date) {
           sprint.start_date = object.value;
         }
         if (actualKey === defaults.state) {
@@ -122,10 +122,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           const sprintStatus = await this.sprintStatusRepository.findOne({ where: { status: object.value } });
           sprint.status = sprintStatus!.id;
         }
-        if (actualKey === defaults.endDate) {
+        if (actualKey === defaults.end_date) {
           sprint.end_date = object.value;
         }
-        if (actualKey === defaults.workUnit) {
+        if (actualKey === defaults.work_unit) {
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
           sprint.work_unit = sprintWorkUnit!.id;
         }
@@ -198,16 +198,16 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         if (actualKey === defaults.bugs) {
           codeQuality.bugs = Number(object.value);
         }
-        if (actualKey === defaults.codeSmells) {
+        if (actualKey === defaults.code_smell) {
           codeQuality.codeSmells = Number(object.value);
         }
-        if (actualKey === defaults.codeCoverage) {
+        if (actualKey === defaults.code_coverage) {
           codeQuality.code_coverage = Number(object.value);
         }
-        if (actualKey === defaults.qualityGateStatus) {
+        if (actualKey === defaults.status) {
           codeQuality.status = object.value;
         }
-        if (actualKey === defaults.analysisDate) {
+        if (actualKey === defaults.snapshot_time) {
           codeQuality.snapshot_time = object.value;
         }
       }

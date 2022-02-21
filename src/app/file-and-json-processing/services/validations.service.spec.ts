@@ -96,6 +96,23 @@ describe('ValidationService', () => {
     expect(true).toEqual(validationService.validateSonar(processedJson));
   });
 
+  it('should validate client status', () => {
+    const processedJson: any = [
+      {
+        properties: [
+          {
+            key: 'clientRating',
+            value: 12,
+          },
+          {
+            key: 'name',
+            value: 'test',
+          },
+        ],
+      },
+    ];
+    expect(true).toEqual(validationService.validateClientStisfaction(processedJson));
+  });
   it('should be validate jira', () => {
     const processedJson: any = [
       {
