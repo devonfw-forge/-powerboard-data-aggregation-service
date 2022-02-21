@@ -14,7 +14,7 @@ import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
 import { TeamSpirit } from '../model/entities/team-spirit.entity';
 import { Team } from '../model/entities/team.entity';
 import { IDataIngestionService } from './data-ingestion.service.interface';
-
+import * as defaults from '../../shared/constants/constants';
 @Injectable()
 export class DataIngestionService extends TypeOrmCrudService<Sprint> implements IDataIngestionService {
   constructor(
@@ -37,27 +37,25 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   }
 
   async ingestTeamSpirit(processedJson: Group[], teamId: string) {
-
     for (let group of processedJson) {
       let teamSpirit: TeamSpirit = {} as TeamSpirit;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'teamSpiritRating') {
+        if (actualKey === defaults.team_spirit_rating) {
           teamSpirit.team_spirit_rating = Number(object.value);
         }
-
       }
 
-      const activeSprint: any = await this.sprintRepository
+      const activeSprint: any = (await this.sprintRepository
         .createQueryBuilder('sprint')
         .addSelect('sprint.id')
         .addSelect('st.status')
         .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
         .where('sprint.team_id =:team_Id', { team_Id: teamId })
         .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
-        .getRawOne() as Sprint;
+        .getRawOne()) as Sprint;
       teamSpirit.sprint = activeSprint;
       const savedEntity = await this.persistTeamSpiritEntity(teamSpirit);
 
@@ -66,38 +64,37 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   }
 
   async persistTeamSpiritEntity(teamSpirit: TeamSpirit) {
-    return await this.teamSpiritRepository.save(teamSpirit)
+    return this.teamSpiritRepository.save(teamSpirit);
   }
 
   async ingestClientStatus(processedJson: Group[], teamId: string) {
     for (let group of processedJson) {
-      let clientSatus: ClientStatus = {} as ClientStatus;
+      let clientStatus: ClientStatus = {} as ClientStatus;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'clientRating') {
-          clientSatus.client_rating = Number(object.value);
+        if (actualKey === defaults.client_rating) {
+          clientStatus.client_rating = Number(object.value);
         }
-
       }
-      const activeSprint: any = await this.sprintRepository
+      const activeSprint: any = (await this.sprintRepository
         .createQueryBuilder('sprint')
         .addSelect('sprint.id')
         .addSelect('st.status')
         .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
         .where('sprint.team_id =:team_Id', { team_Id: teamId })
         .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
-        .getRawOne() as Sprint;
+        .getRawOne()) as Sprint;
 
-      clientSatus.sprint = activeSprint;
-      const savedEntity = await this.persistClientStatusEntity(clientSatus);
+      clientStatus.sprint = activeSprint;
+      const savedEntity = await this.persistClientStatusEntity(clientStatus);
 
       return savedEntity;
     }
   }
   async persistClientStatusEntity(clientStatus: ClientStatus) {
-    return await this.clientStatusRepository.save(clientStatus)
+    return this.clientStatusRepository.save(clientStatus);
   }
 
   async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
@@ -110,13 +107,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'id') {
+        if (actualKey === defaults.sprint_number) {
           sprint.sprint_number = Number(object.value);
         }
-        if (actualKey === 'startDate') {
+        if (actualKey === defaults.start_date) {
           sprint.start_date = object.value;
         }
-        if (actualKey === 'state') {
+        if (actualKey === defaults.state) {
           if (object.value === 'active') {
             object.value = 'Completed';
           } else {
@@ -125,17 +122,17 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           const sprintStatus = await this.sprintStatusRepository.findOne({ where: { status: object.value } });
           sprint.status = sprintStatus!.id;
         }
-        if (actualKey === 'endDate') {
+        if (actualKey === defaults.end_date) {
           sprint.end_date = object.value;
         }
-        if (actualKey === 'workUnit') {
+        if (actualKey === defaults.work_unit) {
           const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
           sprint.work_unit = sprintWorkUnit!.id;
         }
-        if (actualKey === 'value') {
+        if (actualKey === defaults.value) {
           sprintSnapshotMetricValue = object.value;
         }
-        if (actualKey === 'metric') {
+        if (actualKey === defaults.metric) {
           const sprintMetricObj = await this.sprintMetricRepository.findOne({ where: { name: object.value } });
           if (sprintMetricObj !== undefined) {
             sprintMetric = sprintMetricObj;
@@ -198,19 +195,19 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
-        if (actualKey === 'bugs') {
+        if (actualKey === defaults.bugs) {
           codeQuality.bugs = Number(object.value);
         }
-        if (actualKey === 'codeSmells') {
+        if (actualKey === defaults.code_smell) {
           codeQuality.codeSmells = Number(object.value);
         }
-        if (actualKey === 'codeCoverage') {
+        if (actualKey === defaults.code_coverage) {
           codeQuality.code_coverage = Number(object.value);
         }
-        if (actualKey === 'qualityGateStatus') {
+        if (actualKey === defaults.status) {
           codeQuality.status = object.value;
         }
-        if (actualKey === 'analysisDate') {
+        if (actualKey === defaults.snapshot_time) {
           codeQuality.snapshot_time = object.value;
         }
       }
@@ -240,6 +237,4 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       return 'team not found';
     }
   }
-
-
 }

@@ -1,5 +1,5 @@
 export class MockRepository {
-  constructor() { }
+  constructor() {}
   public createQueryBuilder = jest.fn(() => this.queryBuilder);
 
   public manager = { transaction: (a: () => any) => Promise.resolve(a()) };
@@ -32,14 +32,13 @@ export class MockRepository {
     execute: jest.fn().mockReturnThis(),
   };
 }
-export class SprintRepositoryMock extends MockRepository { }
-export class TeamRepositoryMock extends MockRepository { }
-export class SprintMetricRepositoryMock extends MockRepository { }
-export class SprintSnapshotMetricRepositoryMock extends MockRepository { }
-export class SprintWorkUnitRepositoryMock extends MockRepository { }
-export class SprintSnapshotRepositoryMock extends MockRepository { }
-export class SprintStatusRepositoryMock extends MockRepository { }
-export class CodeQualitySnapshotRepositoryMock extends MockRepository { }
-export class TeamSpiritRepositoryMock extends MockRepository { }
-export class ClientStatusRepositoyMock extends MockRepository { }
-
+export class SprintRepositoryMock extends MockRepository {}
+export class TeamRepositoryMock extends MockRepository {}
+export class SprintMetricRepositoryMock extends MockRepository {}
+export class SprintSnapshotMetricRepositoryMock extends MockRepository {}
+export class SprintWorkUnitRepositoryMock extends MockRepository {}
+export class SprintSnapshotRepositoryMock extends MockRepository {}
+export class SprintStatusRepositoryMock extends MockRepository {}
+export class CodeQualitySnapshotRepositoryMock extends MockRepository {}
+export class TeamSpiritRepositoryMock extends MockRepository {}
+export class ClientStatusRepositoyMock extends MockRepository {}

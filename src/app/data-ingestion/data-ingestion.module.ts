@@ -26,7 +26,7 @@ import { DataIngestionService } from './services/data-ingestion.service';
       SprintSnapshotMetric,
       CodeQualitySnapshot,
       TeamSpirit,
-      ClientStatus
+      ClientStatus,
     ]),
   ],
   providers: [
@@ -42,4 +42,4 @@ import { DataIngestionService } from './services/data-ingestion.service';
   controllers: [DataIngestionController],
   exports: ['IDataIngestionService'],
 })
-export class DataIngestionModule { }
+export class DataIngestionModule {}
