@@ -4,7 +4,6 @@ import xlsx from 'node-xlsx';
 import { Group } from '../models/group';
 import { Property } from '../models/property';
 
-
 @Injectable()
 export class FileProcessingService implements IFileProcessingService {
   processXLSXFile(file: any): any {
@@ -12,7 +11,7 @@ export class FileProcessingService implements IFileProcessingService {
     return this.mapFileIntoObject(xlsxFile);
   }
 
-  mapFileIntoObject(file: any): Group[] {
+  public mapFileIntoObject(file: any): Group[] {
     let result: Group[] = [];
     const l1: any = file[0].data;
     for (let i = 1; i < l1.length; i++) {

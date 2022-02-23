@@ -1,0 +1,14 @@
+export const bugs = 'bugs';
+export const code_smell = 'codeSmells';
+export const code_coverage = 'codeCoverage';
+export const status = 'qualityGateStatus';
+export const snapshot_time = 'analysisDate';
+export const sprint_number = 'id';
+export const start_date = 'startDate';
+export const state = 'state';
+export const end_date = 'endDate';
+export const work_unit = 'workUnit';
+export const value = 'value ';
+export const metric = 'metric';
+export const team_spirit_rating = 'teamSpiritRating';
+export const client_rating = 'clientRating';

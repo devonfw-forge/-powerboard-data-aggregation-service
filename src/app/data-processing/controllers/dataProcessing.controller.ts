@@ -13,6 +13,7 @@ export class DataProcessingController {
     @Param('teamId') teamId: string,
     @Response() res: eResponse,
   ): Promise<any> {
+
     const result = await this.dataProcessingService.processJSON(obj, teamId, type);
     res.status(200).json(result);
   }

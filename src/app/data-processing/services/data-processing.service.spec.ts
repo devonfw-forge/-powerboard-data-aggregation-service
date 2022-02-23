@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  ClientStatusRepositoyMock,
   CodeQualitySnapshotRepositoryMock,
   SprintMetricRepositoryMock,
   SprintRepositoryMock,
@@ -8,6 +9,7 @@ import {
   SprintStatusRepositoryMock,
   SprintWorkUnitRepositoryMock,
   TeamRepositoryMock,
+  TeamSpiritRepositoryMock,
 } from '../../../../test/mockCrudRepository/crudRepository.mock';
 import { DataIngestionService } from '../../data-ingestion/services/data-ingestion.service';
 import { FileProcessingService } from '../../file-and-json-processing/services/file-processing.service';
@@ -23,11 +25,15 @@ import { SprintWorkUnit } from '../../data-ingestion/model/entities/sprint_work_
 import { SprintSnapshot } from '../../data-ingestion/model/entities/sprintSnapshot.entity';
 import { SprintStatus } from '../../data-ingestion/model/entities/sprint_status.entity';
 import { CodeQualitySnapshot } from '../../data-ingestion/model/entities/code-quality-snapshot.entity';
+import { ValidationService } from '../../file-and-json-processing/services/validations.service';
+import { TeamSpirit } from '../../data-ingestion/model/entities/team-spirit.entity';
+import { ClientStatus } from '../../data-ingestion/model/entities/client-status.entity';
 describe('DataProcessingService', () => {
   let dataProcessingService: DataProcessingService;
   let dataIngestionService: DataIngestionService;
   let fileProcessingService: FileProcessingService;
   let jsonProcessingService: JsonProcessingService;
+  let validationService: ValidationService;
   //repos
   let sprintRepo: SprintRepositoryMock;
   let teamRepo: TeamRepositoryMock;
@@ -37,6 +43,8 @@ describe('DataProcessingService', () => {
   let sprintSnapshotRepo: SprintSnapshotRepositoryMock;
   let sprintStatusRepo: SprintStatusRepositoryMock;
   let codeQualitySnapshotRepo: CodeQualitySnapshotRepositoryMock;
+  let teamSpiritRepo: TeamSpiritRepositoryMock;
+  let clientStatus: ClientStatusRepositoyMock;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,9 +53,14 @@ describe('DataProcessingService', () => {
         DataIngestionService,
         FileProcessingService,
         JsonProcessingService,
+        ValidationService,
         {
           provide: 'IDataProcessingService',
           useClass: DataProcessingService,
+        },
+        {
+          provide: 'IValidationService',
+          useClass: ValidationService,
         },
         {
           provide: 'IDataIngestionService',
@@ -93,6 +106,14 @@ describe('DataProcessingService', () => {
           provide: getRepositoryToken(CodeQualitySnapshot),
           useClass: CodeQualitySnapshotRepositoryMock,
         },
+        {
+          provide: getRepositoryToken(TeamSpirit),
+          useClass: TeamSpiritRepositoryMock,
+        },
+        {
+          provide: getRepositoryToken(ClientStatus),
+          useClass: ClientStatusRepositoyMock,
+        },
       ],
     }).compile();
 
@@ -100,6 +121,7 @@ describe('DataProcessingService', () => {
     dataIngestionService = module.get<DataIngestionService>('IDataIngestionService');
     fileProcessingService = module.get<FileProcessingService>('IFileProcessingService');
     jsonProcessingService = module.get<JsonProcessingService>('IJsonProcessingService');
+    validationService = module.get<ValidationService>('IValidationService');
     //repo get
     sprintRepo = module.get<SprintRepositoryMock>(getRepositoryToken(Sprint));
     teamRepo = module.get<TeamRepositoryMock>(getRepositoryToken(Team));
@@ -109,6 +131,8 @@ describe('DataProcessingService', () => {
     sprintStatusRepo = module.get<SprintStatusRepositoryMock>(getRepositoryToken(SprintStatus));
     sprintSnapshotRepo = module.get<SprintSnapshotRepositoryMock>(getRepositoryToken(SprintSnapshot));
     codeQualitySnapshotRepo = module.get<CodeQualitySnapshotRepositoryMock>(getRepositoryToken(CodeQualitySnapshot));
+    teamSpiritRepo = module.get<TeamSpiritRepositoryMock>(getRepositoryToken(TeamSpirit));
+    clientStatus = module.get<ClientStatusRepositoyMock>(getRepositoryToken(ClientStatus));
   });
 
   it('should be defined after module initialization', () => {
@@ -116,6 +140,7 @@ describe('DataProcessingService', () => {
     expect(dataIngestionService).toBeDefined();
     expect(fileProcessingService).toBeDefined();
     expect(jsonProcessingService).toBeDefined();
+    expect(validationService).toBeDefined();
     expect(sprintRepo).toBeDefined();
     expect(teamRepo).toBeDefined();
     expect(sprintMetric).toBeDefined();
@@ -124,6 +149,8 @@ describe('DataProcessingService', () => {
     expect(sprintSnapshotRepo).toBeDefined();
     expect(sprintStatusRepo).toBeDefined();
     expect(codeQualitySnapshotRepo).toBeDefined();
+    expect(teamSpiritRepo).toBeDefined();
+    expect(clientStatus).toBeDefined();
   });
 
   it('should process data', async () => {
@@ -211,11 +238,27 @@ describe('DataProcessingService', () => {
     expect(result).toEqual(jiraData);
   });
 
-  it('should ingest code Quality entities ', async () => {
+  /* it('should ingest code Quality entities ', async () => {
     let sonarData: any = 'MockCodeQualitiProcessedData';
     let processedData: any = 'MockProcessedCodeQualityData';
     jest.spyOn(dataIngestionService, 'ingestCodeQuality').mockResolvedValue(sonarData);
     const result = await dataProcessingService.ingestEntities(processedData, 'sonar', 'mockTeamId');
     expect(result).toEqual(sonarData);
+  }); */
+
+  it('should ingest team spirit entities ', async () => {
+    let teamSpiritData: any = 'MockTeamSpiritProcessedData';
+    let processedData: any = 'MockProcessedTeamSpiritData';
+    jest.spyOn(dataIngestionService, 'ingestTeamSpirit').mockResolvedValue(teamSpiritData);
+    const result = await dataProcessingService.ingestEntities(processedData, 'teamspirit', 'mockTeamId');
+    expect(result).toEqual(teamSpiritData);
+  });
+
+  it('should ingest client status entities ', async () => {
+    let clientStatusData: any = 'MockClientStatusProcessedData';
+    let processedData: any = 'MockProcessedClientStatusData';
+    jest.spyOn(dataIngestionService, 'ingestClientStatus').mockResolvedValue(clientStatusData);
+    const result = await dataProcessingService.ingestEntities(processedData, 'clientstatus', 'mockTeamId');
+    expect(result).toEqual(clientStatusData);
   });
 });

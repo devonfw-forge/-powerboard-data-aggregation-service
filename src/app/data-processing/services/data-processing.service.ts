@@ -3,6 +3,7 @@ import { IFileProcessingService } from '../../file-and-json-processing/services/
 import { IJsonProcessingService } from '../../file-and-json-processing/services/json-processing.service.interface';
 import { IDataProcessingService } from './data-processing.service.interface';
 import { IDataIngestionService } from '../../data-ingestion/services/data-ingestion.service.interface';
+import { IValidationService } from '../../file-and-json-processing/services/validations.service.interface';
 
 @Injectable()
 export class DataProcessingService implements IDataProcessingService {
@@ -10,7 +11,8 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IFileProcessingService') private readonly fileProcessingService: IFileProcessingService,
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
-  ) { }
+    @Inject('IValidationService') private readonly validationService: IValidationService,
+  ) {}
 
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
     const processedJson = this.jsonProcessingService.processJson(obj);
@@ -29,7 +31,17 @@ export class DataProcessingService implements IDataProcessingService {
       return this.dataIngestionService.ingestJira(processedData, teamId);
     }
     if (componentType == 'sonar') {
-      return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
+      let result = this.validationService.validateSonar(processedData);
+      console.log(result);
+      if (result) {
+        return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
+      }
+    }
+    if (componentType == 'teamspirit') {
+      return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
+    }
+    if (componentType == 'clientstatus') {
+      return this.dataIngestionService.ingestClientStatus(processedData, teamId);
     }
   }
 }
