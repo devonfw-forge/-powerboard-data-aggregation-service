@@ -36,6 +36,12 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     super(sprintRepository);
   }
 
+
+  /**
+   * It takes the keys of key-value pairs of prcessedJson and matches them with the fields of Team
+   * Spirit entity and then create the team spirit entity object consisting of current active sprint 
+   * and persisit it in the db 
+   */
   async ingestTeamSpirit(processedJson: Group[], teamId: string) {
     for (let group of processedJson) {
       let teamSpirit: TeamSpirit = {} as TeamSpirit;
@@ -67,6 +73,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return this.teamSpiritRepository.save(teamSpirit);
   }
 
+
+
+  /**
+ * It takes the keys of key-value pairs of prcessedJson and matches them with the fields of Client
+ * status entity and then create the client status entity object consisting of current active sprint 
+ * and persisit it in the db 
+ */
   async ingestClientStatus(processedJson: Group[], teamId: string) {
     for (let group of processedJson) {
       let clientStatus: ClientStatus = {} as ClientStatus;
@@ -97,6 +110,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return this.clientStatusRepository.save(clientStatus);
   }
 
+  /**
+   * It matches the keys of key-value pairs of processedJson with the required entity fields and creates
+   * all the required entity objects and finally persist them all together into the db with
+   * the help of persistEntities method
+   */
   async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
     let sprintArray: Sprint[] = [];
     for (let group of processedJson) {
@@ -149,6 +167,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
     return sprintArray;
   }
+
+  /**
+   * It persists the sprint, sprintSnapshot and SprintSnapshotMetric entity into the db and returns
+   * success message if everything goes smooth or failure message if there is any error
+   */
   async persistEntities(sprint: Sprint, sprintSnapshotMetricValue: string, sprintMetric: SprintMetric) {
     const sprintCreated = await this.sprintRepository.save(sprint);
 
@@ -172,6 +195,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     }
   }
 
+  /**
+   * It creates a sprintSnapshotMetric entity object out of the inputs given to it and then returns
+   * the same
+   */
   async createSprintSnapshotMetricEntity(value: string, sprintSnapshot: SprintSnapshot, sprintMetric: SprintMetric) {
     let sprintSnapshotMetric: SprintSnapshotMetric = {} as SprintSnapshotMetric;
     sprintSnapshotMetric.value = value;
@@ -180,6 +207,9 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return sprintSnapshotMetric;
   }
 
+  /**
+   * It creates sprint Snapshot entity object and returns it 
+   */
   createSprintSnapshotEntity(sprint: Sprint): SprintSnapshot {
     let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
     sprintSnapshot.sprint = sprint;
@@ -187,6 +217,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return sprintSnapshot;
   }
 
+  /**
+   * It takes the keys of key-value pairs from processsedJson and matches them with the code quality 
+   * entity fields and create a code quality entity object. And then persist it in the db
+   */
   async ingestCodeQuality(processedJson: Group[], teamId: string) {
     let codeQualityArray: CodeQualitySnapshot[] = [] as CodeQualitySnapshot[];
     for (let group of processedJson) {

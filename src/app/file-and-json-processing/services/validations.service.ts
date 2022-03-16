@@ -3,6 +3,10 @@ import { IValidationService } from './validations.service.interface';
 import * as defaults from '../../shared/constants/constants';
 
 export class ValidationService implements IValidationService {
+  /**
+   * It will validate processed jira data.
+   * This will check whether all the property value is expected data type or not.
+   */
   validateJira(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
@@ -49,7 +53,11 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
-  validateClientStisfaction(data: Group[]): boolean {
+  /**
+   * It will validate processed client satisfaction data.
+   * This will check whether all the property value is expected data type or not.
+   */
+  validateClientSatisfaction(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
@@ -65,6 +73,10 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
+  /**
+   * It will validate processed sonar data.
+   * This will check whether all the property value is expected data type or not.
+   */
   validateSonar(data: Group[]): boolean {
     for (let group of data) {
       for (let object of group.properties) {
@@ -101,12 +113,19 @@ export class ValidationService implements IValidationService {
     return true;
   }
 
+  /**
+   * It will check is value is null or not,
+   * if value is null then call checkError method to throw an error.
+   */
   private isNotNull(value: any): any {
     if (!value) {
       this.checkError(false);
     }
   }
 
+  /**
+   * It will check whether the value is string or not.
+   */
   private isString(value: any): boolean {
     if (typeof value === 'string') {
       return true;
@@ -114,6 +133,9 @@ export class ValidationService implements IValidationService {
     return false;
   }
 
+  /**
+   * It will check whether the value is number or not.
+   */
   private isNumber(value: any): boolean {
     if (typeof value === 'number') {
       return true;
@@ -121,6 +143,9 @@ export class ValidationService implements IValidationService {
     return false;
   }
 
+  /**
+   * It will throw an error is value is null.
+   */
   private checkError(value: boolean): any {
     if (!value) {
       throw new Error('Exception Occured');

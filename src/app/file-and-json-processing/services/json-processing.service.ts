@@ -5,6 +5,10 @@ import { IJsonProcessingService } from './json-processing.service.interface';
 
 @Injectable()
 export class JsonProcessingService implements IJsonProcessingService {
+  /**
+   * 
+   * Extract nested values and set in key value pair
+   */
   flattenJSON(obj: any, res: any, extraKey = ''): any {
     for (let key in obj) {
       if (typeof obj[key] !== 'object') {
@@ -13,9 +17,15 @@ export class JsonProcessingService implements IJsonProcessingService {
         this.flattenJSON(obj[key], res, `${extraKey}${key}_`);
       }
     }
+    console.log("flatted object");
+    console.log(res);
     return res;
   }
 
+  /**
+   * 
+   * Set values of the object into array of key & value pair
+   */
   processJson(obj: any): any {
     const JSON_Obj = this.flattenJSON(obj, {});
     let group = {} as Group;
@@ -29,6 +39,8 @@ export class JsonProcessingService implements IJsonProcessingService {
       group.properties.push(properties);
     }
     result.push(group);
+    console.log('Processedd Jssoooonnnnnnnn');
+    console.log(result);
     return result;
   }
 }
