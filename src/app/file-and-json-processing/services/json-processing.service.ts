@@ -17,6 +17,8 @@ export class JsonProcessingService implements IJsonProcessingService {
         this.flattenJSON(obj[key], res, `${extraKey}${key}_`);
       }
     }
+    console.log("flatted object");
+    console.log(res);
     return res;
   }
 
@@ -37,6 +39,8 @@ export class JsonProcessingService implements IJsonProcessingService {
       group.properties.push(properties);
     }
     result.push(group);
+    console.log('Processedd Jssoooonnnnnnnn');
+    console.log(result);
     return result;
   }
 }
