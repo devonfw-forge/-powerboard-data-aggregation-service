@@ -2,6 +2,7 @@ import { Controller, Inject, Post, UploadedFile, UseInterceptors, Response, Body
 import { IDataProcessingService } from '../services/data-processing.service.interface';
 import { Response as eResponse } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+//import { Cron, CronExpression } from '@nestjs/schedule';
 @Controller('data-processing')
 export class DataProcessingController {
   constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) { }
@@ -30,8 +31,10 @@ export class DataProcessingController {
     res.status(201).json(result);
   }
 
-  @Get('teamSpiritRating')
-  async getTeamSpiritRating() {
-
+  //@Cron('45 * * * * *')
+  // @Cron(CronExpression.EVERY_10_HOURS)
+  @Get('teamSpiritRating/:teamName')
+  async getTeamSpiritRating(@Param('teamName') teamName: string) {
+    return await this.dataProcessingService.getTeamSpiritRating(teamName)
   }
 }

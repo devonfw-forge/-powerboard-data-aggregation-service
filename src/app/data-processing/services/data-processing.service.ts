@@ -1,9 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpService, Inject, Injectable } from '@nestjs/common';
 import { IFileProcessingService } from '../../file-and-json-processing/services/file-processing.service.interface';
 import { IJsonProcessingService } from '../../file-and-json-processing/services/json-processing.service.interface';
 import { IDataProcessingService } from './data-processing.service.interface';
 import { IDataIngestionService } from '../../data-ingestion/services/data-ingestion.service.interface';
 import { IValidationService } from '../../file-and-json-processing/services/validations.service.interface';
+
+
 
 @Injectable()
 export class DataProcessingService implements IDataProcessingService {
@@ -12,6 +14,7 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
     @Inject('IValidationService') private readonly validationService: IValidationService,
+    private httpService: HttpService
   ) { }
 
   /**
@@ -55,5 +58,28 @@ export class DataProcessingService implements IDataProcessingService {
     if (componentType == 'clientstatus') {
       return this.dataIngestionService.ingestClientStatus(processedData, teamId);
     }
+  }
+
+  async getTeamSpiritRating(teamName: string): Promise<any> {
+    const url = process.env.teamSpiritURL;
+    console.log("HHHHHHHHHHHHHHHHHHHHHHHHH")
+    console.log(url)
+    const bearerToken = process.env.bearerToken;
+
+    const headersRequest = {
+      'Content-Type': 'application/json', // afaik this one is not needed
+      'Authorization': `Bearer ${bearerToken}`,
+    };
+
+    const response = await this.httpService.get(url + '/survey/result/' + teamName, { headers: headersRequest }).toPromise()
+      .then((res: any) => {
+        return res.data;
+      });
+    console.log("This is response");
+    console.log(response)
+    return response;
+    // .pipe(
+    //   map(response => response.data),
+    // );
   }
 }
