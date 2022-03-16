@@ -6,7 +6,8 @@ import { IJsonProcessingService } from './json-processing.service.interface';
 @Injectable()
 export class JsonProcessingService implements IJsonProcessingService {
   /**
-   * It will flat down any multi nested json object into a single straight json object
+   * 
+   * Extract nested values and set in key value pair
    */
   flattenJSON(obj: any, res: any, extraKey = ''): any {
     for (let key in obj) {
@@ -22,8 +23,8 @@ export class JsonProcessingService implements IJsonProcessingService {
   }
 
   /**
-   * It first flattens the Json object and then convert each field and its value in the json 
-   * into a key-value pair and returns the whole object 
+   * 
+   * Set values of the object into array of key & value pair
    */
   processJson(obj: any): any {
     const JSON_Obj = this.flattenJSON(obj, {});
