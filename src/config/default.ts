@@ -3,7 +3,7 @@ import { Config } from '../app/shared/model/config/config.model';
 const def: Config = {
   isDev: true,
   host: 'localhost',
-  port: 3000,
+  port: 3001,
   clientUrl: 'localhost:4200',
   globalPrefix: 'v1',
   loggerConfig: {

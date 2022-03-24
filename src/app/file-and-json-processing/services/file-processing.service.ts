@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { IFileProcessingService } from './file-processing.service.interface';
-import xlsx from 'node-xlsx';
+
 import { Group } from '../models/group';
 import { Property } from '../models/property';
 
 @Injectable()
 export class FileProcessingService implements IFileProcessingService {
   processXLSXFile(file: any): any {
-    const xlsxFile = xlsx.parse(file.buffer);
-    return this.mapFileIntoObject(xlsxFile);
+    /*   const xlsxFile = xlsx.parse(file.buffer);
+    return this.mapFileIntoObject(xlsxFile); */
+    return this.mapFileIntoObject(file);
   }
 
   public mapFileIntoObject(file: any): Group[] {
