@@ -13,7 +13,6 @@ export class DataAggregationService implements IDataAggregationService {
     constructor(
         private httpService: HttpService,
         private schedulerRegistry: SchedulerRegistry,
-        //@Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
         @Inject('IDataIngestionService') private readonly dataProcessingService: IDataProcessingService,
         @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
     ) { }
@@ -22,13 +21,20 @@ export class DataAggregationService implements IDataAggregationService {
 
     private async getTeamSpiritRating(teamName: string): Promise<any> {
         const url = process.env.teamSpiritURL;
-        console.log("HHHHHHHHHHHHHHHHHHHHHHHHH")
-        console.log(url)
-        const bearerToken = process.env.bearerToken;
+        const teamSpiritLoginDTO = {
+            email: process.env.teamSpiritUserEmail,
+            password: process.env.teamSpiritUserPassword
+        }
+        const accessToken = await this.httpService.post(url + '/login', teamSpiritLoginDTO).toPromise()
+            .then((res: any) => {
+                console.log('response data');
+                console.log(res.data)
+                return res.data.token;
+            });
 
         const headersRequest = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${bearerToken}`,
+            'Authorization': `Bearer ${accessToken}`,
         };
 
         const response = await this.httpService.get(url + '/survey/result/' + teamName, { headers: headersRequest }).toPromise()
@@ -43,12 +49,10 @@ export class DataAggregationService implements IDataAggregationService {
     }
     private async saveTeamSpiritRatingInDb(teamSpiritResponseData: any, teamName: string) {
         const team = await this.teamRepository.findOne({ where: { name: teamName } }) as Team;
-        console.log("teaaammmmm");
-        console.log(team)
         if (team) {
             return this.dataProcessingService.processJSON(teamSpiritResponseData, team.id, 'teamspirit')
         } else {
-            throw new NotFoundException('Team Not Found');
+            throw new NotFoundException('Team Not Found in Powerboard DB');
         }
 
     }
