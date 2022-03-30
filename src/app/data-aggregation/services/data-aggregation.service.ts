@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { Team } from '../../data-ingestion/model/entities/team.entity';
 import { IDataProcessingService } from '../../data-processing/services/data-processing.service.interface';
 import { IDataAggregationService } from './aggregation.service.interface';
-
+//const cron = require('node-cron');
 @Injectable()
 export class DataAggregationService implements IDataAggregationService {
     constructor(
@@ -19,7 +19,7 @@ export class DataAggregationService implements IDataAggregationService {
 
     schedulerFrequency = 10
 
-    private async getTeamSpiritRating(teamName: string): Promise<any> {
+    private async loginToTeamSpiritApplication(): Promise<string> {
         const url = process.env.teamSpiritURL;
         const teamSpiritLoginDTO = {
             email: process.env.teamSpiritUserEmail,
@@ -32,6 +32,25 @@ export class DataAggregationService implements IDataAggregationService {
                 return res.data.token;
             });
 
+        return accessToken;
+    }
+
+    async getTeamDetailsFromTeamSpirit(teamName: string, accessToken: string): Promise<any> {
+        const url = process.env.teamSpiritURL;
+        const headersRequest = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+        };
+        const response = await this.httpService.get(url + '/team/' + teamName, { headers: headersRequest }).toPromise()
+            .then((res: any) => {
+                return res.data;
+            });
+        return response;
+    }
+    async getTeamSpiritRating(teamName: string, accessToken: string): Promise<any> {
+        // const accessToken = this.loginToTeamSpiritApplication();
+
+        const url = process.env.teamSpiritURL;
         const headersRequest = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
@@ -57,11 +76,18 @@ export class DataAggregationService implements IDataAggregationService {
 
     }
 
+
     async initializeAndStartTeamSpiritScheduler(teamName: string) {
-        const job = new CronJob(` ${this.schedulerFrequency} * * * * *`, () => {
-            // What you want to do here
-            //const teamName = "zerodha"
-            this.getTeamSpiritRating(teamName);
+        const accessToken: any = await this.loginToTeamSpiritApplication();
+        const teamDetails: any = await this.getTeamDetailsFromTeamSpirit(teamName, accessToken);
+        const lastSurvey = teamDetails.Surveys.reduce((a: any, b: any) => a.EndDate > b.EndDate ? a : b);
+
+        let scheduledDate: Date = new Date(lastSurvey.EndDate);
+        console.log("Scheduled Dattttttteeeeeeeeee");
+        console.log(scheduledDate.toString())
+        const job = new CronJob(scheduledDate, () => {
+            console.log("Inside cron job")
+            this.getTeamSpiritRating(teamName, accessToken);
         });
 
         this.schedulerRegistry.addCronJob('FetchTeamRating', job);

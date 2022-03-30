@@ -53,6 +53,7 @@ export class DataProcessingService implements IDataProcessingService {
       }
     }
     if (componentType == 'teamspirit') {
+      console.log("inside processing service")
       return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
     }
     if (componentType == 'clientstatus') {
