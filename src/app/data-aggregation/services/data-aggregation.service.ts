@@ -81,9 +81,11 @@ export class DataAggregationService implements IDataAggregationService {
         const accessToken: any = await this.loginToTeamSpiritApplication();
         const teamDetails: any = await this.getTeamDetailsFromTeamSpirit(teamName, accessToken);
         const lastSurvey = teamDetails.Surveys.reduce((a: any, b: any) => a.EndDate > b.EndDate ? a : b);
-
+        console.log(lastSurvey);
         let scheduledDate: Date = new Date(lastSurvey.EndDate);
+        // let scheduledDate: Date = new Date("2022-03-30T10:26:00.000Z");
         console.log("Scheduled Dattttttteeeeeeeeee");
+        //  console.log(scheduledDate)
         console.log(scheduledDate.toString())
         const job = new CronJob(scheduledDate, () => {
             console.log("Inside cron job")
