@@ -1,7 +1,9 @@
-import { Controller, Inject, Post, UploadedFile, UseInterceptors, Response, Body, Param, Get } from '@nestjs/common';
+import { Controller, Inject, Post, UploadedFile, UseInterceptors, Response, Body, Param } from '@nestjs/common';
 import { IDataProcessingService } from '../services/data-processing.service.interface';
 import { Response as eResponse } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+
+//import { Cron, CronExpression } from '@nestjs/schedule';
 @Controller('data-processing')
 export class DataProcessingController {
   constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) { }
@@ -30,8 +32,5 @@ export class DataProcessingController {
     res.status(201).json(result);
   }
 
-  @Get('teamSpiritRating')
-  async getTeamSpiritRating() {
 
-  }
 }

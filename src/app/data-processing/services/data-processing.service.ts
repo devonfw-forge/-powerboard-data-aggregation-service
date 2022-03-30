@@ -5,6 +5,8 @@ import { IDataProcessingService } from './data-processing.service.interface';
 import { IDataIngestionService } from '../../data-ingestion/services/data-ingestion.service.interface';
 import { IValidationService } from '../../file-and-json-processing/services/validations.service.interface';
 
+
+
 @Injectable()
 export class DataProcessingService implements IDataProcessingService {
   constructor(
@@ -12,6 +14,7 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
     @Inject('IValidationService') private readonly validationService: IValidationService,
+
   ) { }
 
   /**
@@ -50,10 +53,13 @@ export class DataProcessingService implements IDataProcessingService {
       }
     }
     if (componentType == 'teamspirit') {
+      console.log("inside processing service")
       return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
     }
     if (componentType == 'clientstatus') {
       return this.dataIngestionService.ingestClientStatus(processedData, teamId);
     }
   }
+
+
 }
