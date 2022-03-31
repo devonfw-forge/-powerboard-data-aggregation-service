@@ -28,7 +28,7 @@ phases:
       - echo Pushing the Docker images...
       # - docker push $REPOSITORY_URI:latest
       # - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_IMAGE_NAME:latest
+      - docker push $REPO_URI:$AWS_IMAGE_TAG
       - echo Writing image definitions file...
       - printf '[{"name":$AWS_IMAGE_NAME,"imageUri":"%s"}]' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_IMAGE_NAME:latest > imagedefinitions.json
       - cat imagedefinitions.json
