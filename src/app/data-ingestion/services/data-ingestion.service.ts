@@ -252,9 +252,9 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
         if (actualKey === defaults.state) {
           if (object.value === 'active') {
-            object.value = 'Completed';
-          } else {
             object.value = 'In Progress';
+          } else {
+            object.value = 'Completed';
           }
           const sprintStatus = await this.sprintStatusRepository.findOne({ where: { status: object.value } });
           if (sprintStatus) {
@@ -332,8 +332,14 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       if (sprintSnapshots.length > 0) {
         throw new ConflictException('Sprint Snapshot already exist');
       }
+      existedSprint.status = sprint.status;
+      existedSprint.start_date = sprint.start_date;
+      existedSprint.end_date = sprint.end_date;
 
-      sprintSnapshot = this.createSprintSnapshotEntity(existedSprint, sprintSnapshotTime);
+      const updatedSprint = await this.sprintRepository.save(existedSprint);
+      if (updatedSprint) {
+        sprintSnapshot = this.createSprintSnapshotEntity(updatedSprint, sprintSnapshotTime);
+      }
     } else {
       const sprintCreated = await this.sprintRepository.save(sprint);
       if (sprintCreated) {
