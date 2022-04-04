@@ -15,10 +15,6 @@ export class DataUploadController {
     @Param('type') type: string,
     @Response() res: eResponse,
   ): Promise<void> {
-    console.log(
-      'finally reached from backend to aggregation service=====================================================',
-    );
-    console.log(file);
     const result = await this.dataProcessingService.processXLSXfile(file, teamId, type);
     res.status(201).json(result);
   }
@@ -30,11 +26,18 @@ export class DataUploadController {
     @Param('type') type: string,
     @Response() res: eResponse,
   ): Promise<void> {
-    console.log(
-      'finally reached from backend to aggregation service=====================================================',
-    );
-    console.log(file);
     const result = await this.dataProcessingService.processXLSXfile(file, teamId, type);
     res.status(201).json(result);
+  }
+
+  @Post('uploadJson/:type/:teamId')
+  async processData(
+    @Body() obj: any,
+    @Param('type') type: string,
+    @Param('teamId') teamId: string,
+    @Response() res: eResponse,
+  ): Promise<any> {
+    const result = await this.dataProcessingService.processJSON(obj, teamId, type);
+    res.status(200).json(result);
   }
 }

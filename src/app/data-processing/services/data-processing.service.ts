@@ -12,10 +12,10 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
     @Inject('IValidationService') private readonly validationService: IValidationService,
-  ) { }
+  ) {}
 
   /**
-   * It gets back the processed Json object from the json processing service and then call the 
+   * It gets back the processed Json object from the json processing service and then call the
    * corresponding ingest method for the specific data type with the help of ingestEntities method
    */
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
@@ -40,11 +40,13 @@ export class DataProcessingService implements IDataProcessingService {
     const componentType: string = type.toLowerCase();
 
     if (componentType == 'jira') {
-      return this.dataIngestionService.ingestJira(processedData, teamId);
+      let result = this.validationService.validateJira(processedData);
+      if (result) {
+        return this.dataIngestionService.ingestJira(processedData, teamId);
+      }
     }
     if (componentType == 'sonar') {
       let result = this.validationService.validateSonar(processedData);
-      console.log(result);
       if (result) {
         return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
       }

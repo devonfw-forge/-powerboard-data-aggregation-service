@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { Repository } from 'typeorm/repository/Repository';
@@ -36,11 +36,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     super(sprintRepository);
   }
 
-
   /**
    * It takes the keys of key-value pairs of prcessedJson and matches them with the fields of Team
-   * Spirit entity and then create the team spirit entity object consisting of current active sprint 
-   * and persisit it in the db 
+   * Spirit entity and then create the team spirit entity object consisting of current active sprint
+   * and persisit it in the db
    */
   async ingestTeamSpirit(processedJson: Group[], teamId: string) {
     for (let group of processedJson) {
@@ -73,13 +72,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     return this.teamSpiritRepository.save(teamSpirit);
   }
 
-
-
   /**
- * It takes the keys of key-value pairs of prcessedJson and matches them with the fields of Client
- * status entity and then create the client status entity object consisting of current active sprint 
- * and persisit it in the db 
- */
+   * It takes the keys of key-value pairs of prcessedJson and matches them with the fields of Client
+   * status entity and then create the client status entity object consisting of current active sprint
+   * and persisit it in the db
+   */
   async ingestClientStatus(processedJson: Group[], teamId: string) {
     for (let group of processedJson) {
       let clientStatus: ClientStatus = {} as ClientStatus;
@@ -107,6 +104,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     }
   }
   async persistClientStatusEntity(clientStatus: ClientStatus) {
+    const currentClientStatus: any = (await this.clientStatusRepository.findOne({
+      where: { sprint: clientStatus.sprint },
+    })) as ClientStatus;
+    if (currentClientStatus) {
+      currentClientStatus.client_rating = clientStatus.client_rating;
+      return this.clientStatusRepository.save(currentClientStatus);
+    }
     return this.clientStatusRepository.save(clientStatus);
   }
 
@@ -115,7 +119,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
    * all the required entity objects and finally persist them all together into the db with
    * the help of persistEntities method
    */
-  async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
+  /* async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
     let sprintArray: Sprint[] = [];
     for (let group of processedJson) {
       let sprint: Sprint = {} as Sprint;
@@ -167,58 +171,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
     return sprintArray;
   }
+ */
 
   /**
-   * It persists the sprint, sprintSnapshot and SprintSnapshotMetric entity into the db and returns
-   * success message if everything goes smooth or failure message if there is any error
-   */
-  async persistEntities(sprint: Sprint, sprintSnapshotMetricValue: string, sprintMetric: SprintMetric) {
-    const sprintCreated = await this.sprintRepository.save(sprint);
-
-    let sprintSnapshotMetricSaved;
-    if (sprintCreated) {
-      const sprintSnapshot = this.createSprintSnapshotEntity(sprintCreated);
-      const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
-      if (sprintSnapshotSaved) {
-        const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
-          sprintSnapshotMetricValue,
-          sprintSnapshotSaved,
-          sprintMetric,
-        );
-        sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
-      }
-    }
-    if (sprintSnapshotMetricSaved) {
-      return 'success';
-    } else {
-      return 'failure';
-    }
-  }
-
-  /**
-   * It creates a sprintSnapshotMetric entity object out of the inputs given to it and then returns
-   * the same
-   */
-  async createSprintSnapshotMetricEntity(value: string, sprintSnapshot: SprintSnapshot, sprintMetric: SprintMetric) {
-    let sprintSnapshotMetric: SprintSnapshotMetric = {} as SprintSnapshotMetric;
-    sprintSnapshotMetric.value = value;
-    sprintSnapshotMetric.snapshot = sprintSnapshot;
-    sprintSnapshotMetric.metric = sprintMetric;
-    return sprintSnapshotMetric;
-  }
-
-  /**
-   * It creates sprint Snapshot entity object and returns it 
-   */
-  createSprintSnapshotEntity(sprint: Sprint): SprintSnapshot {
-    let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
-    sprintSnapshot.sprint = sprint;
-    sprintSnapshot.date_time = sprint.start_date;
-    return sprintSnapshot;
-  }
-
-  /**
-   * It takes the keys of key-value pairs from processsedJson and matches them with the code quality 
+   * It takes the keys of key-value pairs from processsedJson and matches them with the code quality
    * entity fields and create a code quality entity object. And then persist it in the db
    */
   async ingestCodeQuality(processedJson: Group[], teamId: string) {
@@ -270,5 +226,183 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     } else {
       return 'team not found';
     }
+  }
+
+  /**
+   * It matches the keys of key-value pairs of processedJson with the required entity fields and creates
+   * all the required entity objects and finally persist them all together into the db with
+   * the help of persistEntities method
+   */
+  async ingestJira(processedJson: Group[], teamId: string): Promise<any> {
+    let sprintArray: Sprint[] = [];
+    for (let group of processedJson) {
+      let sprint: Sprint = {} as Sprint;
+      let sprintSnapshotMetricCompletedValue: string = '';
+      let sprintSnapshotMetricCommittedValue: string = '';
+      let sprintSnapshotTime: string = '';
+      for (let object of group.properties) {
+        let key = object.key;
+        let splittedKeys = key.split('_');
+        var actualKey = splittedKeys[splittedKeys.length - 1];
+        if (actualKey === defaults.sprint_number) {
+          sprint.sprint_number = Number(object.value);
+        }
+        if (actualKey === defaults.start_date) {
+          sprint.start_date = object.value;
+        }
+        if (actualKey === defaults.state) {
+          if (object.value === 'active') {
+            object.value = 'Completed';
+          } else {
+            object.value = 'In Progress';
+          }
+          const sprintStatus = await this.sprintStatusRepository.findOne({ where: { status: object.value } });
+          if (sprintStatus) {
+            sprint.status = sprintStatus!.id;
+          } else {
+            throw new NotFoundException("State doesn't match");
+          }
+        }
+        if (actualKey === defaults.end_date) {
+          sprint.end_date = object.value;
+        }
+        if (actualKey === defaults.work_unit) {
+          const sprintWorkUnit = await this.sprintWorkUnitRepository.findOne({ where: { work_unit: object.value } });
+          if (sprintWorkUnit) {
+            sprint.work_unit = sprintWorkUnit!.id;
+          } else {
+            throw new NotFoundException("Work Unit doesn't match");
+          }
+        }
+
+        if (actualKey === defaults.completed) {
+          sprintSnapshotMetricCompletedValue = object.value;
+        }
+
+        if (actualKey === defaults.committed) {
+          sprintSnapshotMetricCommittedValue = object.value;
+        }
+
+        if (actualKey === defaults.jira_snapshot_time) {
+          sprintSnapshotTime = object.value;
+        }
+      }
+      const team = await this.teamRepository.findOne({ where: { id: teamId } });
+      sprint.team = team!;
+      sprintArray.push(sprint);
+
+      const result = await this.persistJiraEntities(
+        sprint,
+        sprintSnapshotTime,
+        sprintSnapshotMetricCommittedValue,
+        sprintSnapshotMetricCompletedValue,
+      );
+      console.log(result);
+    }
+
+    return sprintArray;
+  }
+
+  /**
+   * It persists the sprint, sprintSnapshot and SprintSnapshotMetric entity into the db and returns
+   * success message if everything goes smooth or failure message if there is any error
+   */
+  async persistJiraEntities(
+    sprint: Sprint,
+    sprintSnapshotTime: string,
+    sprintSnapshotMetricCommittedValue: string,
+    sprintSnapshotMetricCompletedValue: string,
+  ) {
+    let result: boolean = true;
+    let sprintSnapshot: SprintSnapshot = new SprintSnapshot();
+    const existedSprint = (await this.sprintRepository.findOne({
+      where: { sprint_number: sprint.sprint_number, team: sprint.team },
+    })) as Sprint;
+    if (existedSprint) {
+      console.log(existedSprint.work_unit);
+      console.log(sprint.work_unit);
+      const workUnit = existedSprint.work_unit as unknown as SprintWorkUnit;
+      if (workUnit.id !== sprint.work_unit) {
+        throw new NotFoundException("Work Unit doesn't match");
+      }
+      let newDate = new Date(sprintSnapshotTime);
+      const sprintSnapshots = (await this.sprintSnapshotRepository.find({
+        where: { sprint: existedSprint, date_time: newDate },
+      })) as SprintSnapshot[];
+      if (sprintSnapshots.length > 0) {
+        throw new ConflictException('Sprint Snapshot already exist');
+      }
+
+      sprintSnapshot = this.createSprintSnapshotEntity(existedSprint, sprintSnapshotTime);
+    } else {
+      const sprintCreated = await this.sprintRepository.save(sprint);
+      if (sprintCreated) {
+        sprintSnapshot = this.createSprintSnapshotEntity(sprintCreated, sprintSnapshotTime);
+      }
+    }
+    const sprintSnapshotSaved = await this.sprintSnapshotRepository.save(sprintSnapshot);
+    if (sprintSnapshotSaved) {
+      if (sprintSnapshotMetricCommittedValue !== '') {
+        const sprintMetricCommitted = (await this.sprintMetricRepository.findOne({
+          where: { name: 'Work Committed' },
+        })) as SprintMetric;
+        if (sprintMetricCommitted) {
+          const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
+            sprintSnapshotMetricCommittedValue,
+            sprintSnapshotSaved,
+            sprintMetricCommitted,
+          );
+          const sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
+          if (sprintSnapshotMetricSaved) {
+            console.log(sprintSnapshotMetricSaved);
+            result = true;
+          } else {
+            result = false;
+          }
+        }
+      }
+      if (sprintSnapshotMetricCompletedValue !== '') {
+        const sprintMetricCompleted = (await this.sprintMetricRepository.findOne({
+          where: { name: 'Work Completed' },
+        })) as SprintMetric;
+        if (sprintMetricCompleted) {
+          const sprintSnapshotMetric = await this.createSprintSnapshotMetricEntity(
+            sprintSnapshotMetricCompletedValue,
+            sprintSnapshotSaved,
+            sprintMetricCompleted,
+          );
+          const sprintSnapshotMetricSaved = await this.sprintSnapshotMetricRepository.save(sprintSnapshotMetric);
+          if (sprintSnapshotMetricSaved) {
+            console.log(sprintSnapshotMetricSaved);
+            result = true;
+          } else {
+            result = false;
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * It creates sprint Snapshot entity object and returns it
+   */
+  createSprintSnapshotEntity(sprint: Sprint, snapshotTime: string): SprintSnapshot {
+    let sprintSnapshot: SprintSnapshot = {} as SprintSnapshot;
+    sprintSnapshot.sprint = sprint;
+    sprintSnapshot.date_time = snapshotTime;
+    return sprintSnapshot;
+  }
+
+  /**
+   * It creates a sprintSnapshotMetric entity object out of the inputs given to it and then returns
+   * the same
+   */
+  createSprintSnapshotMetricEntity(value: string, sprintSnapshot: SprintSnapshot, sprintMetric: SprintMetric) {
+    let sprintSnapshotMetric: SprintSnapshotMetric = {} as SprintSnapshotMetric;
+    sprintSnapshotMetric.value = value;
+    sprintSnapshotMetric.snapshot = sprintSnapshot;
+    sprintSnapshotMetric.metric = sprintMetric;
+    return sprintSnapshotMetric;
   }
 }
