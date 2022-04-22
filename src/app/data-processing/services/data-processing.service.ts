@@ -12,14 +12,15 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
     @Inject('IValidationService') private readonly validationService: IValidationService,
-  ) { }
+  ) {}
 
   /**
-   * It gets back the processed Json object from the json processing service and then call the 
+   * It gets back the processed Json object from the json processing service and then call the
    * corresponding ingest method for the specific data type with the help of ingestEntities method
    */
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
     const processedJson = this.jsonProcessingService.processJson(obj);
+    console.log(processedJson);
     return this.ingestEntities(processedJson, type, teamId);
   }
 
