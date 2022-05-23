@@ -186,13 +186,13 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
         if (actualKey === defaults.bugs) {
-          codeQuality.bugs = Number(object.value);
+          codeQuality.bugs = Math.round(Number(object.value));
         }
         if (actualKey === defaults.code_smell) {
-          codeQuality.codeSmells = Number(object.value);
+          codeQuality.codeSmells = Math.round(Number(object.value));
         }
         if (actualKey === defaults.code_coverage) {
-          codeQuality.code_coverage = Number(object.value);
+          codeQuality.code_coverage = Math.round(Number(object.value));
         }
         if (actualKey === defaults.status) {
           codeQuality.status = object.value;

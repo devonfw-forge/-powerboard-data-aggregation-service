@@ -19,8 +19,33 @@ export class DataProcessingService implements IDataProcessingService {
    * corresponding ingest method for the specific data type with the help of ingestEntities method
    */
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
+    if (type == 'sonar') {
+      obj = this.preProcessingOfSonar(obj);
+    }
     const processedJson = this.jsonProcessingService.processJson(obj);
     return this.ingestEntities(processedJson, type, teamId);
+  }
+
+  preProcessingOfSonar(obj: any) {
+    for (let metric of obj.component.measures) {
+      if (metric.metric == 'code_smells') {
+        metric.codeSmells = metric.value;
+      }
+      if (metric.metric == 'coverage') {
+        metric.codeCoverage = metric.value;
+      }
+      if (metric.metric == 'bugs') {
+        metric.bugs = metric.value;
+      }
+      if (metric.metric == 'alert_status') {
+        if (metric.value == 'OK') {
+          metric.qualityGateStatus = 'PASSED';
+        } else {
+          metric.qualityGateStatus = 'FAILED';
+        }
+      }
+    }
+    return obj;
   }
 
   /**
@@ -46,10 +71,10 @@ export class DataProcessingService implements IDataProcessingService {
       }
     }
     if (componentType == 'sonar') {
-      let result = this.validationService.validateSonar(processedData);
+      /*  let result = this.validationService.validateSonar(processedData);
       if (result) {
-        return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
-      }
+      */ return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
+      /* } */
     }
     if (componentType == 'teamspirit') {
       return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
