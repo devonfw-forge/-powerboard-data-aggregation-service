@@ -202,14 +202,18 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         }
       }
       let team = await this.teamRepository.findOne(teamId);
-
       if (team) {
         codeQuality.team = team;
+      } else {
+        throw new NotFoundException('Team not found Exception');
       }
 
       const codeQualitySnapshotSaved = await this.persistCodeQuality(codeQuality);
-
-      codeQualityArray.push(codeQualitySnapshotSaved);
+      if (codeQualitySnapshotSaved) {
+        codeQualityArray.push(codeQualitySnapshotSaved);
+      } else {
+        throw new ConflictException('Error uploading sonar !! Please try again');
+      }
     }
 
     return codeQualityArray;

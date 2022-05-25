@@ -106,38 +106,45 @@ export class ValidationService implements IValidationService {
    * This will check whether all the property value is expected data type or not.
    */
   validateSonar(data: Group[]): boolean {
+    this.errors = [];
     for (let group of data) {
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
         if (actualKey === defaults.bugs) {
-          this.isNotNull(object.value);
-          let result = this.isNumber(object.value);
-          this.checkError(result);
+          let result = this.checkIsNull(object.value, defaults.bugs);
+          if (!result) {
+            this.checkIsNumber(object.value, defaults.bugs);
+          }
         }
         if (actualKey === defaults.code_smell) {
-          this.isNotNull(object.value);
-          let result = this.isNumber(object.value);
-          this.checkError(result);
+          let result = this.checkIsNull(object.value, defaults.code_smell);
+          if (!result) {
+            this.checkIsNumber(object.value, defaults.code_smell);
+          }
         }
         if (actualKey === defaults.code_coverage) {
-          this.isNotNull(object.value);
-          let result = this.isNumber(object.value);
-          this.checkError(result);
+          let result = this.checkIsNull(object.value, defaults.code_coverage);
+          if (!result) {
+            this.checkIsNumber(object.value, defaults.code_coverage);
+          }
         }
         if (actualKey === defaults.status) {
-          this.isNotNull(object.value);
-          let result = this.isString(object.value);
-          this.checkError(result);
+          let result = this.checkIsNull(object.value, defaults.status);
+          if (!result) {
+            this.checkIsString(object.value, defaults.status);
+          }
         }
         if (actualKey === defaults.snapshot_time) {
-          this.isNotNull(object.value);
-          let result = this.isString(object.value);
-          this.checkError(result);
+          let result = this.checkIsNull(object.value, defaults.snapshot_time);
+          if (!result) {
+            this.checkIsString(object.value, defaults.snapshot_time);
+          }
         }
       }
     }
+    this.checkErrors();
     return true;
   }
 
@@ -149,16 +156,6 @@ export class ValidationService implements IValidationService {
     if (!value) {
       this.checkError(false);
     }
-  }
-
-  /**
-   * It will check whether the value is string or not.
-   */
-  private isString(value: any): boolean {
-    if (typeof value === 'string') {
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -195,6 +192,9 @@ export class ValidationService implements IValidationService {
     return false;
   }
 
+  /**
+   * It will check whether the value is string or not.
+   */
   private checkIsString(value: any, message: any) {
     if (typeof value === 'string') {
       return true;

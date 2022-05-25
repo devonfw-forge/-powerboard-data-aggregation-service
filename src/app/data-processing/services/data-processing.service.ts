@@ -29,13 +29,13 @@ export class DataProcessingService implements IDataProcessingService {
   preProcessingOfSonar(obj: any) {
     for (let metric of obj.component.measures) {
       if (metric.metric == 'code_smells') {
-        metric.codeSmells = metric.value;
+        metric.codeSmells = Number(metric.value);
       }
       if (metric.metric == 'coverage') {
-        metric.codeCoverage = metric.value;
+        metric.codeCoverage = Number(metric.value);
       }
       if (metric.metric == 'bugs') {
-        metric.bugs = metric.value;
+        metric.bugs = Number(metric.value);
       }
       if (metric.metric == 'alert_status') {
         if (metric.value == 'OK') {
@@ -71,10 +71,10 @@ export class DataProcessingService implements IDataProcessingService {
       }
     }
     if (componentType == 'sonar') {
-      /*  let result = this.validationService.validateSonar(processedData);
+      let result = this.validationService.validateSonar(processedData);
       if (result) {
-      */ return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
-      /* } */
+        return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
+      }
     }
     if (componentType == 'teamspirit') {
       return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
