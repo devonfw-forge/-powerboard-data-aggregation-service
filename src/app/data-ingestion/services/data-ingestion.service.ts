@@ -95,11 +95,19 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
         .where('sprint.team_id =:team_Id', { team_Id: teamId })
         .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
+        .orderBy('sprint.sprint_number', 'DESC')
         .getRawOne()) as Sprint;
 
       clientStatus.sprint = activeSprint;
       const savedEntity = await this.persistClientStatusEntity(clientStatus);
-
+      if (savedEntity) {
+        let team = await this.teamRepository.findOne(teamId);
+        if (team) {
+          this.updateTeamStatus(team);
+        } else {
+          throw new NotFoundException('Team not found Exception');
+        }
+      }
       return savedEntity;
     }
   }
@@ -211,6 +219,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
       const codeQualitySnapshotSaved = await this.persistCodeQuality(codeQuality);
       if (codeQualitySnapshotSaved) {
         codeQualityArray.push(codeQualitySnapshotSaved);
+        this.updateTeamStatus(team);
       } else {
         throw new ConflictException('Error uploading sonar !! Please try again');
       }
@@ -221,6 +230,11 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
 
   async persistCodeQuality(codeQualityEntity: CodeQualitySnapshot) {
     return this.codeQualitySnapshotRepository.save(codeQualityEntity);
+  }
+
+  async updateTeamStatus(teamEntity: Team) {
+    teamEntity.isStatusChanged = true;
+    return this.teamRepository.save(teamEntity);
   }
 
   async findTeamUsingTeamId(teamId: string): Promise<string | Team> {
@@ -291,9 +305,14 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           sprintSnapshotTime = object.value;
         }
       }
-      const team = await this.teamRepository.findOne({ where: { id: teamId } });
-      sprint.team = team!;
-      sprintArray.push(sprint);
+      const team = (await this.teamRepository.findOne({ where: { id: teamId } })) as Team;
+
+      if (team) {
+        sprint.team = team!;
+        sprintArray.push(sprint);
+      } else {
+        throw new NotFoundException('Team not found Exception');
+      }
 
       const result = await this.persistJiraEntities(
         sprint,
@@ -301,6 +320,10 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         sprintSnapshotMetricCommittedValue,
         sprintSnapshotMetricCompletedValue,
       );
+
+      if (result) {
+        this.updateTeamStatus(team);
+      }
       console.log(result);
     }
 
