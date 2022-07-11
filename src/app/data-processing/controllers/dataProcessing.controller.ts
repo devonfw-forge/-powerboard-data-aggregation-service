@@ -1,10 +1,12 @@
-import { Controller, Inject, Post, UploadedFile, UseInterceptors, Response, Body, Param, Get } from '@nestjs/common';
+import { Controller, Inject, Post, UploadedFile, UseInterceptors, Response, Body, Param } from '@nestjs/common';
 import { IDataProcessingService } from '../services/data-processing.service.interface';
 import { Response as eResponse } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+
+//import { Cron, CronExpression } from '@nestjs/schedule';
 @Controller('data-processing')
 export class DataProcessingController {
-  constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) { }
+  constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) {}
 
   @Post('processJson/:type/:teamId')
   async processData(
@@ -13,7 +15,6 @@ export class DataProcessingController {
     @Param('teamId') teamId: string,
     @Response() res: eResponse,
   ): Promise<any> {
-
     const result = await this.dataProcessingService.processJSON(obj, teamId, type);
     res.status(200).json(result);
   }
@@ -28,10 +29,5 @@ export class DataProcessingController {
     console.log(file);
     const result = await this.dataProcessingService.processXLSXfile(file, teamId, type);
     res.status(201).json(result);
-  }
-
-  @Get('teamSpiritRating')
-  async getTeamSpiritRating() {
-
   }
 }
