@@ -20,48 +20,50 @@ import { DataAggregationController } from './controllers/data-aggregation.contro
 import { DataAggregationService } from './services/data-aggregation.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([
-        Sprint,
-        SprintStatus,
-        SprintWorkUnit,
-        Team,
-        SprintMetric,
-        SprintSnapshot,
-        SprintSnapshotMetric,
-        CodeQualitySnapshot,
-        TeamSpirit,
-        ClientStatus,
+  imports: [
+    TypeOrmModule.forFeature([
+      Sprint,
+      SprintStatus,
+      SprintWorkUnit,
+      Team,
+      SprintMetric,
+      SprintSnapshot,
+      SprintSnapshotMetric,
+      CodeQualitySnapshot,
+      TeamSpirit,
+      ClientStatus,
     ]),
-        HttpModule],
+    HttpModule,
+  ],
 
-    providers: [
-        {
-            provide: 'IDataAggregationService',
-            useClass: DataAggregationService,
-        },
-        {
-            provide: 'IDataProcessingService',
-            useClass: DataProcessingService,
-        },
-        {
-            provide: 'IDataIngestionService',
-            useClass: DataIngestionService,
-        },
-        {
-            provide: 'IFileProcessingService',
-            useClass: FileProcessingService,
-        },
-        {
-            provide: 'IJsonProcessingService',
-            useClass: JsonProcessingService,
-        },
-        {
-            provide: 'IValidationService',
-            useClass: ValidationService,
-        },
-    ],
+  providers: [
+    {
+      provide: 'IDataAggregationService',
+      useClass: DataAggregationService,
+    },
+    {
+      provide: 'IDataProcessingService',
+      useClass: DataProcessingService,
+    },
+    {
+      provide: 'IDataIngestionService',
+      useClass: DataIngestionService,
+    },
+    {
+      provide: 'IFileProcessingService',
+      useClass: FileProcessingService,
+    },
+    {
+      provide: 'IJsonProcessingService',
+      useClass: JsonProcessingService,
+    },
+    {
+      provide: 'IValidationService',
+      useClass: ValidationService,
+    },
+  ],
 
-    controllers: [DataAggregationController],
-    exports: ['IDataAggregationService'],
+  controllers: [DataAggregationController],
+  exports: ['IDataAggregationService'],
 })
-export class DataAggregationModule { }
+export class DataAggregationModule {}

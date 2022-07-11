@@ -15,4 +15,4 @@ import { DataProcessingService } from './services/data-processing.service';
   controllers: [DataProcessingController],
   exports: ['IDataProcessingService'],
 })
-export class DataProcessingModule { }
+export class DataProcessingModule {}

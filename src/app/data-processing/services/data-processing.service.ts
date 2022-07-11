@@ -5,8 +5,6 @@ import { IDataProcessingService } from './data-processing.service.interface';
 import { IDataIngestionService } from '../../data-ingestion/services/data-ingestion.service.interface';
 import { IValidationService } from '../../file-and-json-processing/services/validations.service.interface';
 
-
-
 @Injectable()
 export class DataProcessingService implements IDataProcessingService {
   constructor(
@@ -14,16 +12,40 @@ export class DataProcessingService implements IDataProcessingService {
     @Inject('IJsonProcessingService') private readonly jsonProcessingService: IJsonProcessingService,
     @Inject('IDataIngestionService') private readonly dataIngestionService: IDataIngestionService,
     @Inject('IValidationService') private readonly validationService: IValidationService,
-
-  ) { }
+  ) {}
 
   /**
-   * It gets back the processed Json object from the json processing service and then call the 
+   * It gets back the processed Json object from the json processing service and then call the
    * corresponding ingest method for the specific data type with the help of ingestEntities method
    */
   async processJSON(obj: any, teamId: string, type: string): Promise<any> {
+    if (type == 'sonar') {
+      obj = this.preProcessingOfSonar(obj);
+    }
     const processedJson = this.jsonProcessingService.processJson(obj);
     return this.ingestEntities(processedJson, type, teamId);
+  }
+
+  preProcessingOfSonar(obj: any) {
+    for (let metric of obj.component.measures) {
+      if (metric.metric == 'code_smells') {
+        metric.codeSmells = Number(metric.value);
+      }
+      if (metric.metric == 'coverage') {
+        metric.codeCoverage = Number(metric.value);
+      }
+      if (metric.metric == 'bugs') {
+        metric.bugs = Number(metric.value);
+      }
+      if (metric.metric == 'alert_status') {
+        if (metric.value == 'OK') {
+          metric.qualityGateStatus = 'PASSED';
+        } else {
+          metric.qualityGateStatus = 'FAILED';
+        }
+      }
+    }
+    return obj;
   }
 
   /**
@@ -43,23 +65,23 @@ export class DataProcessingService implements IDataProcessingService {
     const componentType: string = type.toLowerCase();
 
     if (componentType == 'jira') {
-      return this.dataIngestionService.ingestJira(processedData, teamId);
+      let result = this.validationService.validateJira(processedData);
+      if (result) {
+        return this.dataIngestionService.ingestJira(processedData, teamId);
+      }
     }
     if (componentType == 'sonar') {
       let result = this.validationService.validateSonar(processedData);
-      console.log(result);
       if (result) {
         return this.dataIngestionService.ingestCodeQuality(processedData, teamId);
       }
     }
     if (componentType == 'teamspirit') {
-      console.log("inside processing service")
+      console.log('inside processing service');
       return this.dataIngestionService.ingestTeamSpirit(processedData, teamId);
     }
     if (componentType == 'clientstatus') {
       return this.dataIngestionService.ingestClientStatus(processedData, teamId);
     }
   }
-
-
 }

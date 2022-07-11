@@ -6,7 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 //import { Cron, CronExpression } from '@nestjs/schedule';
 @Controller('data-processing')
 export class DataProcessingController {
-  constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) { }
+  constructor(@Inject('IDataProcessingService') private dataProcessingService: IDataProcessingService) {}
 
   @Post('processJson/:type/:teamId')
   async processData(
@@ -15,7 +15,6 @@ export class DataProcessingController {
     @Param('teamId') teamId: string,
     @Response() res: eResponse,
   ): Promise<any> {
-
     const result = await this.dataProcessingService.processJSON(obj, teamId, type);
     res.status(200).json(result);
   }
@@ -31,6 +30,4 @@ export class DataProcessingController {
     const result = await this.dataProcessingService.processXLSXfile(file, teamId, type);
     res.status(201).json(result);
   }
-
-
 }
