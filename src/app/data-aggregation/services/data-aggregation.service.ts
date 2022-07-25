@@ -13,7 +13,7 @@ export class DataAggregationService implements IDataAggregationService {
   constructor(
     private httpService: HttpService,
     private schedulerRegistry: SchedulerRegistry,
-    @Inject('IDataIngestionService') private readonly dataProcessingService: IDataProcessingService,
+    @Inject('IDataProcessingService') private readonly dataProcessingService: IDataProcessingService,
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
   ) {}
 
