@@ -50,7 +50,7 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
         if (actualKey === defaults.team_spirit_rating) {
-          teamSpirit.team_spirit_rating = Number(object.value);
+          teamSpirit.team_spirit_rating = Math.round(Number(object.value));
         }
       }
 
@@ -101,17 +101,32 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
           clientStatus.client_rating = Number(object.value);
         }
       }
-      const activeSprint: any = (await this.sprintRepository
+      const activeSprints: any = (await this.sprintRepository
         .createQueryBuilder('sprint')
-        .addSelect('sprint.id')
-        .addSelect('st.status')
-        .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
         .where('sprint.team_id =:team_Id', { team_Id: teamId })
-        .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
-        .orderBy('sprint.sprint_number', 'DESC')
-        .getRawOne()) as Sprint;
+        .orderBy('sprint.end_date', 'DESC')
+        .getRawMany()) as Sprint[];
+      console.log(activeSprints);
+      if (activeSprints) {
+        let sprintFound: boolean = false;
+        let date = new Date();
+        for (let sprint of activeSprints) {
+          if (date > sprint.sprint_end_date) {
+            const selectedSprint = (await this.sprintRepository.findOne({
+              where: { id: sprint.sprint_id },
+            })) as Sprint;
+            clientStatus.sprint = selectedSprint;
+            sprintFound = true;
+            break;
+          }
+        }
+        if (!sprintFound) {
+          throw new NotFoundException('Sprint not found');
+        }
+      } else {
+        throw new NotFoundException('Sprint not found');
+      }
 
-      clientStatus.sprint = activeSprint;
       const savedEntity = await this.persistClientStatusEntity(clientStatus);
       if (savedEntity) {
         let team = await this.teamRepository.findOne(teamId);
