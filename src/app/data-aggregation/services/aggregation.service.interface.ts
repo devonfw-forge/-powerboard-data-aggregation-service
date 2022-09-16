@@ -1,4 +1,5 @@
 export interface IDataAggregationService {
-  initializeAndStartTeamSpiritScheduler(teamName: string): any;
-  reInitializeAndRestartTeamSpiritScheduler(teamName: string): any;
+  initializeAndStartTeamSpiritScheduler(teamId: string): any;
+  reInitializeAndRestartTeamSpiritScheduler(teamId: string): any;
+  checkTeamSpiritTeamName(teamName:string): Promise<any>;
 }

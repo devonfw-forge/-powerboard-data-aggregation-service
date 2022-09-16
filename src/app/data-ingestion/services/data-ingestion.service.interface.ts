@@ -5,4 +5,5 @@ export interface IDataIngestionService {
   ingestCodeQuality(processedJson: Group[], teamId: string): any;
   ingestTeamSpirit(processedJson: Group[], teamId: string): any;
   ingestClientStatus(processedJson: Group[], teamId: string): any;
+  registerCronJob(status:string, application: string, teamId: string): any;
 }
