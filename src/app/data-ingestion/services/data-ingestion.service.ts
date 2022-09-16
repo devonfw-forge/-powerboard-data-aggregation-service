@@ -11,10 +11,12 @@ import { SprintSnapshotMetric } from '../model/entities/sprintSnapshotMetric.ent
 import { SprintMetric } from '../model/entities/sprint_metric.entity';
 import { SprintStatus } from '../model/entities/sprint_status.entity';
 import { SprintWorkUnit } from '../model/entities/sprint_work_unit.entity';
-import { TeamSpirit } from '../model/entities/team-spirit.entity';
 import { Team } from '../model/entities/team.entity';
 import { IDataIngestionService } from './data-ingestion.service.interface';
 import * as defaults from '../../shared/constants/constants';
+import { TeamSpiritMedian } from '../model/entities/team-spirit-median.entity';
+import { CronJob } from '../model/entities/cron_job.entity';
+
 @Injectable()
 export class DataIngestionService extends TypeOrmCrudService<Sprint> implements IDataIngestionService {
   constructor(
@@ -28,10 +30,12 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
     @InjectRepository(Team) private readonly teamRepository: Repository<Team>,
     @InjectRepository(CodeQualitySnapshot)
     private readonly codeQualitySnapshotRepository: Repository<CodeQualitySnapshot>,
-    @InjectRepository(TeamSpirit)
-    private readonly teamSpiritRepository: Repository<TeamSpirit>,
+    @InjectRepository(TeamSpiritMedian)
+    private readonly teamSpiritMedianRepository: Repository<TeamSpiritMedian>,
     @InjectRepository(ClientStatus)
     private readonly clientStatusRepository: Repository<ClientStatus>,
+    @InjectRepository(CronJob)
+    private readonly cronJobRepository: Repository<CronJob>,
   ) {
     super(sprintRepository);
   }
@@ -44,45 +48,52 @@ export class DataIngestionService extends TypeOrmCrudService<Sprint> implements 
   async ingestTeamSpirit(processedJson: Group[], teamId: string) {
     console.log('inside ingestion service');
     for (let group of processedJson) {
-      let teamSpirit: TeamSpirit = {} as TeamSpirit;
+      let teamSpirit: TeamSpiritMedian = {} as TeamSpiritMedian;
       for (let object of group.properties) {
         let key = object.key;
         let splittedKeys = key.split('_');
         var actualKey = splittedKeys[splittedKeys.length - 1];
         if (actualKey === defaults.team_spirit_rating) {
-          teamSpirit.team_spirit_rating = Math.round(Number(object.value));
+          teamSpirit.surveyMedian = Math.round(Number(object.value));
+        }
+        if (actualKey === defaults.start_date) {
+          teamSpirit.startDate = object.value;
+        }
+        if (actualKey === defaults.end_date) {
+          teamSpirit.endDate = object.value;
+        }
+        if (actualKey === defaults.survey_code) {
+          teamSpirit.surveyCode = object.value;
         }
       }
 
-      const activeSprint: any = (await this.sprintRepository
-        .createQueryBuilder('sprint')
-        .addSelect('sprint.id')
-        .addSelect('st.status')
-        .innerJoin(SprintStatus, 'st', 'st.id=sprint.status')
-        .where('sprint.team_id =:team_Id', { team_Id: teamId })
-        .andWhere('sprint.status=:status', { status: '11155bf2-ada5-495c-8019-8d7ab76d488e' })
-        .getRawOne()) as Sprint;
-      teamSpirit.sprint = activeSprint;
-
+      const team = (await this.teamRepository.findOne({ where: { id: teamId } })) as Team;
+      teamSpirit.team = team;
       console.log('Team Spirittttttttttttttttttttttt');
       console.log(teamSpirit);
       const savedEntity = await this.persistTeamSpiritEntity(teamSpirit);
-
       return savedEntity;
     }
   }
 
-  async persistTeamSpiritEntity(teamSpirit: TeamSpirit) {
-    const currentTeamSpirit = (await this.teamSpiritRepository.findOne({
-      where: { sprint: teamSpirit.sprint },
-    })) as TeamSpirit;
+  async persistTeamSpiritEntity(teamSpirit: TeamSpiritMedian) {
+    return this.teamSpiritMedianRepository.save(teamSpirit);
+  }
 
-    if (currentTeamSpirit) {
-      currentTeamSpirit.team_spirit_rating = teamSpirit.team_spirit_rating;
-      return this.teamSpiritRepository.save(currentTeamSpirit);
+  async registerCronJob(status:string, application: string, teamId: string){
+    const existingCronJob : CronJob = (await this.cronJobRepository.createQueryBuilder('cron_job')
+    .where('cron_job.team_id=:team_id', { team_id: teamId })
+    .andWhere('cron_job.application=:application',{application: application})
+    .take(1)
+    .getOne()) as CronJob;
+    if(existingCronJob){
+      await this.cronJobRepository.delete(existingCronJob.id);
     }
-
-    return this.teamSpiritRepository.save(teamSpirit);
+    let cronJob : CronJob = new CronJob();
+    cronJob.status = status;
+    cronJob.application = application;
+    cronJob.team = teamId;
+    return this.cronJobRepository.save(cronJob); 
   }
 
   /**

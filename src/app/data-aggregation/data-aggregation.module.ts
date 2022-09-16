@@ -3,12 +3,14 @@ import { Module } from '@nestjs/common/decorators/modules/module.decorator';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientStatus } from '../data-ingestion/model/entities/client-status.entity';
 import { CodeQualitySnapshot } from '../data-ingestion/model/entities/code-quality-snapshot.entity';
+import { CronJob } from '../data-ingestion/model/entities/cron_job.entity';
 import { Sprint } from '../data-ingestion/model/entities/sprint.entity';
 import { SprintSnapshot } from '../data-ingestion/model/entities/sprintSnapshot.entity';
 import { SprintSnapshotMetric } from '../data-ingestion/model/entities/sprintSnapshotMetric.entity';
 import { SprintMetric } from '../data-ingestion/model/entities/sprint_metric.entity';
 import { SprintStatus } from '../data-ingestion/model/entities/sprint_status.entity';
 import { SprintWorkUnit } from '../data-ingestion/model/entities/sprint_work_unit.entity';
+import { TeamSpiritMedian } from '../data-ingestion/model/entities/team-spirit-median.entity';
 import { TeamSpirit } from '../data-ingestion/model/entities/team-spirit.entity';
 import { Team } from '../data-ingestion/model/entities/team.entity';
 import { DataIngestionService } from '../data-ingestion/services/data-ingestion.service';
@@ -32,6 +34,8 @@ import { DataAggregationService } from './services/data-aggregation.service';
       CodeQualitySnapshot,
       TeamSpirit,
       ClientStatus,
+      TeamSpiritMedian,
+      CronJob
     ]),
     HttpModule,
   ],
